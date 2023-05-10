@@ -1,22 +1,17 @@
+// Define an interface which declares methods through which the databse will be queried.
+// Then, concrete implementation classes can implement the interface and contain the data access
+// logic to return the required data.
+
 package DAO;
 
 import Model.Account;
-import Util.ConnectionUtil;
+import java.util.List;
 
-// Create a DAO classes for each table in the SocialMedia.sql database.
-// Implement the CRUD (Create, Read, Update, Delete) operartions for the Account table.
-// In each method create a PreparedStatement object
-
-public class AccountDao{
-    // Establish connection with the database
-    private final Connection conn = ConnectionUtil.getConnection();
-
-    // Create a new account
-
-    // Get account by id
-
-    // Update account
-
-    // Delete account
-
+public interface AccountDao {
+    // Define CRUD (Create, Retrieve, Update, Delete) operations
+    Account getAccountById(int id); // Retrieve an Account object by its ID. 
+    List<Account> getAllAccounts(); // Retrieve all Account objects in the system.
+    boolean insertAccount(Account account); // Insert a new Account object into system. 
+    boolean updateAccount(Account account); // Update an existing Account object in the system.
+    boolean deleteAccount(int id); // Delete an Account object from system.
 }

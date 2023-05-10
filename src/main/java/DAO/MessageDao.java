@@ -1,17 +1,14 @@
 package DAO;
 
-import Model.Account;
-import Util.ConnectionUtil;
+import Model.Message;
+import java.util.List;
 
-public class MessageDao {
-    private final Connection conn = ConnectionUtil.getConnection();
 
-    // Create a new message
-
-    // Get message by id
-
-    // Update message
-
-    // Delete message
-    
+public interface MessageDao {
+    // Define CRUD (Create, Retrieve, Update, Delete) operations
+    List<Message> getAllMessages(); // Method to retrieve all the messages from the database.
+    Message getMessageById(int messageId); // Method to retrieve a specific messages by its ID.
+    boolean createMessage(Message message); // Method to create a new messages in the database.
+    boolean updateMessage(Message message); // Method to update an exiting message in the database.
+    boolean deleteMessage(int messageId); // Method to delete a message by its ID.
 }
