@@ -10,19 +10,34 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MessageDaoImpl implements MessageDao {
-    private final Connection conn = ConnectionUtil.getConnection();
-
-    // Create a new message
-    @Override
-    public boolean createMessage(Message message){
-        // TODO
-    }
 
     // Retrieve all message from the databse
     @Override
     public List<Message> getAllMessages(){
         // TODO
     }
+   
+    // Create a new message
+    @Override
+    public boolean createMessage(Message message){
+        String sql = "INSERT INTO message(posted_by, message_text, time_posted_epoch) VALUES (?, ?, ?)";
+        try(Connection conn = ConnectionUtil.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)){
+            stmt.setInt(1, message.getPostedBy());
+            stmt.setString(2, message.getMessageText());
+            stmt.setLong(3, message.getTimePostedEpoch());
+
+            int count = stmt.executeUpdate();
+            if(count > 0){
+                return true;
+            }
+
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 
     // Retrieve a specific message by its ID
     public Message getMessageById(int messageId){
