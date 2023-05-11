@@ -12,22 +12,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+// This class implements the DAO for the Message table in the SocialMedia.sql database.
+// It provides the CRUD (Create, Retrieve, Update, Delete) operartions for messages.
+
+
 public class MessageDao implements Dao<Message> {
 
     // Retrieve a specific message by its ID
     @Override
     public Optional<Message> get(long id){
         Message message = null;
-        try (Connection conn = ConnectionUtil.getConnection()){
-            String sql = "SELECT * FROM message WHERE message_id = ?";
-            PreparedStatement ps = conn.prepareStatement(sql);
+        // The SQL string is outside the try block as it doesn't require closure like Connection, PreparedStatement, or ResultSet.
+        String sql = "SELECT * FROM message WHERE message_id = ?";
+        try (Connection conn = ConnectionUtil.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)){
             ps.setInt(1, id);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()){
-                message = new Message(rs.getInt("message_id"), rs.getInt("posted_by"), rs.getString("message_text"), rs.getLong("time_posted_epoch"));
+            // ResultSet is in a separate try block to ensure it gets closed after use,
+            // even if an exceprion is thrown during data processing. 
+            try(ResultSet rs = ps.executeQuery()){
+                while (rs.next()){
+                    message = new Message(rs.getInt("message_id"), rs.getInt("posted_by"), rs.getString("message_text"), rs.getLong("time_posted_epoch"));
+                }
             }
         } catch (SQLException e){
-            e.printStackTrace();
+            System.out.println("Error message: " + e.getMessage());
         }
 
         // If the message is not found an empty Optional is returned
@@ -38,15 +46,16 @@ public class MessageDao implements Dao<Message> {
     @Override
     public List<Message> getAll(){
         List<Message> messages = new ArrayList<>();
-        try (Connection conn = ConnectionUtil.getConnection()){
-            String sql = "SELECT * FROM message";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()){
-                messages.add(new Message(rs.getInt("message_id"), rs.getInt("posted_by"), rs.getString("message_text"), rs.getLong("time_posted_epoch")));
+        String sql = "SELECT * FROM message";
+        try (Connection conn = ConnectionUtil.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)){
+            try (ResultSet rs = ps.executeQuery()){
+                while (rs.next()){
+                    messages.add(new Message(rs.getInt("message_id"), rs.getInt("posted_by"), rs.getString("message_text"), rs.getLong("time_posted_epoch")));
+                }
             }
         } catch (SQLException e){
-            e.printStackTrace();
+            System.out.println("Error message: " + e.getMessage());
         }
         return messages;
     }
@@ -64,36 +73,36 @@ public class MessageDao implements Dao<Message> {
             ps.executeUpdate();
 
         } catch (SQLException e){
-            e.printStackTrace();
+            System.out.println("Error message: " + e.getMessage());
         }
     }
 
-    // Update an existing message in the databaee
+    // Update an existing message in the database
     @Override
     public void update(Message message){
-        try(Connection conn = ConnectionUtil.getConnection()) {
-            String sql = "UPDATE message SET posted_by = ?, message_text = ?, time_posted_epoch = ? WHERE message_id =?";
-            PreparedStatement ps = conn.prepareStatement(sql);
+        String sql = "UPDATE message SET posted_by = ?, message_text = ?, time_posted_epoch = ? WHERE message_id =?";
+        try(Connection conn = ConnectionUtil.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)){
             ps.setInt(1, message.getPosted_by());
             ps.setString(2, message.getMessage_text());
             ps.setLong(3, message.getTime_posted_epoch());
             ps.setInt(4, message.getMessage_id());
             ps.executeUpdate();
         } catch (SQLException e){
-            e.printStackTrace();
+            System.out.println("Error message: " + e.getMessage());
         }
     }
 
     // Delete a message by its ID
     @Override
     public void delete(Message message){
-        try(Connection conn = ConnectionUtil.getConnection()) {
+        try(Connection conn = ConnectionUtil.getConnection();
             String sql = "DELETE FROM message WHERE message_id = ?";
-            PreparedStatement ps = conn.prepareStatement(sql);
+            PreparedStatement ps = conn.prepareStatement(sql)){
             ps.setInt(1, message.getMessage_id());
             ps.executeUpdate();
         } catch (SQLException e){
-            e.printStackTrace();
+            System.out.println("Error message: " + e.getMessage());
         }
     }
 }
