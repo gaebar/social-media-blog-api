@@ -19,14 +19,39 @@ import java.util.List;
 public class AccountDaoImpl implements AccountDao {
 
 
+    // Get account by id
+    @Override
+    public Account getAccountById(int id){
+        try (Connection conn = ConnectionUtil.getConnection()){
+            
+            String sql = "SELECT * FROM account WHERE account_id = ?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, id);
+            
+            ResultSet rs = ps.executeQuery();
+
+            if(rs.next()){
+                return new Account (
+                    rs.getInt("account_id"), 
+                    rs.getString("username"), 
+                    rs.getString("password")
+                );
+            }
+
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     @Override
     public List<Account> getAllAccounts(){
         List<Account> accounts = new ArrayList<>();
 
         try (Connection conn = ConnectionUtil.getConnection()){
             String sql = "SELECT * FROM account";
-            try (PreparedStatement stmt = conn.prepareStatement(sql)){
-                try (ResultSet rs = stmt.executeQuery()){
+            try (PreparedStatement ps = conn.prepareStatement(sql)){
+                try (ResultSet rs = ps.executeQuery()){
                     while (rs.next()){
                         Account account = new Account(
                             rs.getInt("account_id"), 
@@ -42,29 +67,37 @@ public class AccountDaoImpl implements AccountDao {
         return accounts;
     }
 
-    // Get account by id
+    // Insert Account
     @Override
-    public Account getAccountById(int accountId){
-        // TODO
-    }
+    public boolean insertAccount(Account account){
+        try (Connection conn = ConnectionUtil.getConnection()){
+            
+            String sql = "INSERT INTO account (usernam, password) VALUES(?, ?)";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, account.getUsername());
+            ps.setString(2, account.getPassword());
 
-    // Create Account
-    @Override
-    public boolean createAccount(Account account){
-        // TODO
+            
+            return ps.executeQuery() !=0;
+
+
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+        return false;
     }
 
     // Update account
     @Override
     public boolean updateAccount(Account account){
         try (Connection conn = ConnectionUtil.getConnection()){
-            String sql = "UPDATE account SET username=?, password=? WHERE account_id=?";
-            try (PreparedStatement stmt = conn.prepareStatement(sql)){
-                stmt.setString(1, account.getUsername());
-                stmt.setString(2, account.getPassword());
-                stmt.setInt(3, account.getAccount_id());
+            String sql = "UPDATE account SET username = ?, password = ? WHERE account_id = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sql)){
+                ps.setString(1, account.getUsername());
+                ps.setString(2, account.getPassword());
+                ps.setInt(3, account.getAccount_id());
 
-                int rowsAffected = stmt.executeUpdate();
+                int rowsAffected = ps.executeUpdate();
                
                 return rowsAffected >0;
             }
@@ -76,8 +109,19 @@ public class AccountDaoImpl implements AccountDao {
 
     // Delete account
     @Override
-    public boolean deleteAccount(int accountId){
-        // TODO
+    public boolean deleteAccount(int id){
+        try (Connection conn = ConnectionUtil.getConnection()){
+            String sql = "DELETE FROM account WHERE account_id = ?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+
+            ps.setInt(1, id);
+
+            return ps.executeUpdate() !=0;
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return false;
+
     }
 
 }
