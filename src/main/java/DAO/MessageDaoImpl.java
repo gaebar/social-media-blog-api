@@ -2,44 +2,48 @@ package DAO;
 
 import Model.Message;
 import Util.ConnectionUtil;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-public class MessageDaoImpl implements MessageDao {
-
+public class MessageDaoImpl implements Dao<Message> {
 
     // Retrieve a specific message by its ID
     @Override
-    public Message getMessageById(int messageId){
+    public Optional<Message> get(long id){
         Message message = null;
         try (Connection conn = ConnectionUtil.getConnection()){
             String sql = "SELECT * FROM message WHERE message_id = ?";
             PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, messageId);
+            ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
             while (rs.next()){
-                message = new Message(rs.getInt("message_id"), rs.getInt("posted_id"), rs.getString("message_text"), rs.getLong("time_posted_epoch"));
+                message = new Message(rs.getInt("message_id"), rs.getInt("posted_by"), rs.getString("message_text"), rs.getLong("time_posted_epoch"));
             }
         } catch (SQLException e){
             e.printStackTrace();
         }
-        return message;
+
+        // If the message is not found an empty Optional is returned
+        return Optional.ofNullable(message);
     }
 
     // Retrieve all message from the databse
     @Override
-    public List<Message> getAllMessages(){
+    public List<Message> getAll(){
         List<Message> messages = new ArrayList<>();
         try (Connection conn = ConnectionUtil.getConnection()){
             String sql = "SELECT * FROM message";
             PreparedStatement ps = conn.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
             while (rs.next()){
-                messages.add(new Message(rs.getInt("message_id"), rs.getInt("posted_id"), rs.getString("message_text"), rs.getLong("time_posted_epoch")));
+                messages.add(new Message(rs.getInt("message_id"), rs.getInt("posted_by"), rs.getString("message_text"), rs.getLong("time_posted_epoch")));
             }
         } catch (SQLException e){
             e.printStackTrace();
@@ -49,7 +53,7 @@ public class MessageDaoImpl implements MessageDao {
    
     // Create a new message
     @Override
-    public boolean createMessage(Message message){
+    public void insert(Message message){
         String sql = "INSERT INTO message(posted_by, message_text, time_posted_epoch) VALUES (?, ?, ?)";
         try(Connection conn = ConnectionUtil.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)){
@@ -57,23 +61,19 @@ public class MessageDaoImpl implements MessageDao {
             ps.setString(2, message.getMessage_text());
             ps.setLong(3, message.getTime_posted_epoch());
 
-            int count = ps.executeUpdate();
-            if(count > 0){
-                return true;
-            }
+            ps.executeUpdate();
 
         } catch (SQLException e){
             e.printStackTrace();
         }
-        return false;
     }
 
     // Update an existing message in the databaee
     @Override
-    public boolean updateMessage(Message message){
-        try(Connection conn = ConnectionUtil.getConnection() {
+    public void update(Message message){
+        try(Connection conn = ConnectionUtil.getConnection()) {
             String sql = "UPDATE message SET posted_by = ?, message_text = ?, time_posted_epoch = ? WHERE message_id =?";
-            PreparedStatement ps = conn.prepareStatement(sql)){
+            PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, message.getPosted_by());
             ps.setString(2, message.getMessage_text());
             ps.setLong(3, message.getTime_posted_epoch());
@@ -85,13 +85,12 @@ public class MessageDaoImpl implements MessageDao {
     }
 
     // Delete a message by its ID
-    // WORK ON THIS
     @Override
-    public boolean deleteMessage(int messageId){
+    public void delete(Message message){
         try(Connection conn = ConnectionUtil.getConnection()) {
             String sql = "DELETE FROM message WHERE message_id = ?";
             PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, messageId);
+            ps.setInt(1, message.getMessage_id());
             ps.executeUpdate();
         } catch (SQLException e){
             e.printStackTrace();
