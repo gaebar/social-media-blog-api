@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class MessageDaoImpl implements Dao<Message> {
+public class MessageDao implements Dao<Message> {
 
     // Retrieve a specific message by its ID
     @Override

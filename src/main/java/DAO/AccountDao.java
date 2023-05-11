@@ -17,7 +17,7 @@ import java.util.Optional;
 // Implement the CRUD (Create, Retrieve, Update, Delete) operartions for the Account table.
 // In each method create a PreparedStatement object
 
-public class AccountDaoImpl implements Dao<Account> {
+public class AccountDao implements Dao<Account> {
 
 
     // Get account by id
