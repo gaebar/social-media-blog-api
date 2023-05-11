@@ -1,5 +1,10 @@
 package Controller;
 
+import Service.AccountService;;
+import Service.MessageService;
+import Model.Account;
+import Model.Message;
+
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 
@@ -14,9 +19,25 @@ public class SocialMediaController {
      * suite must receive a Javalin object from this method.
      * @return a Javalin app object which defines the behavior of the Javalin controller.
      */
+
+    private final AccountService accountService;
+    private final MessageService messageService;
+
+    public SocialMediaController(AccountService accountService, MessageService messageService){
+        this.accountService = accountService;
+        this.messageService = messageService;
+    }
+
     public Javalin startAPI() {
         Javalin app = Javalin.create();
-        app.get("example-endpoint", this::exampleHandler);
+        app.post("/register", this::registerAccount);
+        app.post("/login", this::loginAccount);
+        app.post("/messages", this::createMessage);
+        app.get("/messages", this::getAllMesage);
+        app.get("/messages/:id", this::getMessageById);
+        app.delete("/messages/:id", this::deleteMessageById);
+        app.patch("/messages/:id", this::updateMessageById);
+        app.get("/accounts/:id/messages", this::getMessageByAccountId);
 
         return app;
     }
