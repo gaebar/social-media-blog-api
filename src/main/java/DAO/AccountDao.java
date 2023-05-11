@@ -3,10 +3,7 @@ package DAO;
 import Model.Account;
 import Util.ConnectionUtil;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +27,7 @@ public class AccountDao implements Dao<Account> {
         this case explicity.
      */
 
-    // Retrieves an account by its ID.
+    // Retrieves an account by its ID
     @Override
     public Optional<Account> get(long id){
         // The try-with-resources statement is used for 'Conncection', 'PreparedStatement', and 'ResultSet' objects.
@@ -84,21 +81,28 @@ public class AccountDao implements Dao<Account> {
     }
 
 
-    // Inserts a new account into the databse.
+    // Inserts a new account into the databse
     @Override
     public void insert(Account account){
         String sql = "INSERT INTO account (username, password) VALUES(?, ?)";
         try(Connection conn = ConnectionUtil.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql)){
+            PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
                 ps.setString(1, account.getUsername());
                 ps.setString(2, account.getPassword());
                 ps.executeUpdate();
+
+                // Retrieve the generated keys (auto-generated ID)
+                ResultSet generatedKeys = ps.getGeneratedKeys();
+                if(generatedKeys.next()){
+                    int generatedId = generatedKeys.getInt(1);
+                    account.setAccount_id(generatedId);
+                }
         } catch (SQLException e){
             System.out.println("Error message: " + e.getMessage());
         }
     }
 
-    // Updates an existing account in the database.
+    // Updates an existing account in the database
     @Override
     public void update(Account account){
         String sql = "UPDATE account SET username = ?, password = ? WHERE account_id = ?";
