@@ -59,7 +59,7 @@ public class MessageDao implements Dao<Message> {
    
     // Create a new message
     @Override
-    public void insert(Message message){
+    public Message insert(Message message){
         String sql = "INSERT INTO message(posted_by, message_text, time_posted_epoch) VALUES (?, ?, ?)";
         try(Connection conn = ConnectionUtil.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
@@ -73,12 +73,13 @@ public class MessageDao implements Dao<Message> {
             ResultSet generatedKeys = ps.getGeneratedKeys();
             if(generatedKeys.next()){
                 int generatedId = generatedKeys.getInt(1);
-                account.setAccount_id(generatedId);
+                message.setMessage_id(generatedId);
             }
 
         } catch (SQLException e){
             System.out.println("Error message: " + e.getMessage());
         }
+        return message;
     }
 
     // Update an existing message in the database
@@ -100,8 +101,8 @@ public class MessageDao implements Dao<Message> {
     // Delete a message by its ID
     @Override
     public void delete(Message message){
+        String sql = "DELETE FROM message WHERE message_id = ?";
         try(Connection conn = ConnectionUtil.getConnection();
-            String sql = "DELETE FROM message WHERE message_id = ?";
             PreparedStatement ps = conn.prepareStatement(sql)){
             ps.setInt(1, message.getMessage_id());
             ps.executeUpdate();

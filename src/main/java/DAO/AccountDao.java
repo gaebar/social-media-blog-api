@@ -83,7 +83,7 @@ public class AccountDao implements Dao<Account> {
 
     // Inserts a new account into the databse
     @Override
-    public void insert(Account account){
+    public Account insert(Account account){
         String sql = "INSERT INTO account (username, password) VALUES(?, ?)";
         try(Connection conn = ConnectionUtil.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
@@ -94,12 +94,13 @@ public class AccountDao implements Dao<Account> {
                 // Retrieve the generated keys (auto-generated ID)
                 ResultSet generatedKeys = ps.getGeneratedKeys();
                 if(generatedKeys.next()){
-                    int generatedId = generatedKeys.getInt(1);
-                    account.setAccount_id(generatedId);
+                    int generated_account_id = (int)generatedKeys.getInt(1);
+                    return new Account(generated_account_id, account.getUsername(), account.getPassword());
                 }
         } catch (SQLException e){
             System.out.println("Error message: " + e.getMessage());
         }
+        return null;
     }
 
     // Updates an existing account in the database
