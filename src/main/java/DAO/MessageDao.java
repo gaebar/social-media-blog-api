@@ -17,7 +17,7 @@ public class MessageDao implements Dao<Message> {
 
     // Retrieve a specific message by its ID
     @Override
-    public Optional<Message> get(long id){
+    public Optional<Message> get(int id){
         Message message = null;
         // The SQL string is outside the try block as it doesn't require closure like Connection, PreparedStatement, or ResultSet.
         String sql = "SELECT * FROM message WHERE message_id = ?";
@@ -56,6 +56,25 @@ public class MessageDao implements Dao<Message> {
         }
         return messages;
     }
+
+    // Retrieve all messages posted by a specific account
+    public List<Message> getMessagesByAccountId(int accountId){
+        List<Message> messages = new ArrayList<>();
+        String sql = "SELECT * FROM message WHERE posted_by =?";
+        try (Connection conn = ConnectionUtil.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)){
+                ps.setInt(1, accountId);
+            try (ResultSet rs = ps.executeQuery()){
+                while (rs.next()){
+                    messages.add(new Message(rs.getInt("message_id"), rs.getInt("posted_by"), rs.getString("message_text"), rs.getLong("time_posted_epoch")));
+                }
+            }
+        } catch (SQLException e){
+            System.out.println("Error message: " + e.getMessage());
+        }
+        return messages;
+    }
+
    
     // Create a new message
     @Override

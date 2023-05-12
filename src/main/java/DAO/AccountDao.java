@@ -29,7 +29,7 @@ public class AccountDao implements Dao<Account> {
 
     // Retrieves an account by its ID
     @Override
-    public Optional<Account> get(long id){
+    public Optional<Account> get(int id){
         // The try-with-resources statement is used for 'Conncection', 'PreparedStatement', and 'ResultSet' objects.
         // This ensure that each resourse will be properly closed even if an exception is thrown,
         // thereby helping to prevent resorce leaks in the application.
