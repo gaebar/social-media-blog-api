@@ -37,37 +37,79 @@ public class AccountService {
 
     //Retrieves an Account by its ID using the AccountDao
     public Optional<Account> getAccountById(int id){
-        return accountDao.get(id);
+        try {
+            return accountDao.get(id);
+        } catch (SQLException e){
+            e.printStackTrace();
+            return Optional.empty(); // return an empty Optional if an excpion occurs
+        }
     }
 
     // Retrieves all accounts using the AccountDao
     public List<Account> getAllAccounts(){
+        try {
         return accountDao.getAll();
+        } catch (SQLException e){
+            e.printStackTrace();
+            return List.of(); // return an empty list on failure
+        }
     }
 
     // Finds an account by username using the AccountDao
     public Optional<Account> findAccountByUsername(String username){
-        return accountDao.findAccountByUsername(username);
+        try{
+            return accountDao.findAccountByUsername(username);
+        } catch (SQLException e){
+            e.printStackTrace();
+            return Optional.empty();
+        }
     }
 
     // Validate login using the AccountDao
     public Optional<Account> validateLogin(String username, String password){
-        return accountDao.validateLogin(username, password);
+        try{
+            Optional<Account> account = accountDao.validateLogin(username, password);
+            return account;
+        } catch (SQLException e){
+            e.printStackTrace();
+            return Optional.empty();
+        }
     }
 
 
     // Insert a new account into the database using the AccaountDao
     public Account createAccount(Account account){
-        return accountDao.insert(account);
+        try {
+            if(account.getUsername().trim().isEmpty() || account.getPassword().length() < 4 || accountDao.doesUsernameExist((account.getUsername()))){
+                throw new IllegalArgumentException("Username can not be blank, password must be at least 4 characters long, and the username must be unique.");
+            }
+            return accountDao.insert(account);
+        } catch (SQLException e){
+            e.printStackTrace();
+            return null;
+        }
     }
 
     // Updates an existing account in the database using the AccountDao
-    public void updateAccount(Account account){
-        accountDao.update(account);
+    public boolean updateAccount(Account account){
+        try{
+        return accountDao.update(account);
+        } catch (SQLException e){
+            e.printStackTrace();
+            return false;
+        }
     }
 
     // Deletes an existing account from the database
-    public void deleteAccount(Account account){
-        accountDao.delete(account);
+    public boolean deleteAccount(Account account){
+        if(account.getAccount_id() == 0){
+            throw new IllegalArgumentException("Account ID cannot be null");
+        }
+        try {
+            return accountDao.delete(account);
+        } catch (SQLException e){
+            e.printStackTrace();
+            return false;
+        }
     }
 }

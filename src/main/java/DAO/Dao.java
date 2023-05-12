@@ -4,18 +4,15 @@
 
 package DAO;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-// Add void return type in the DAO interface methods 'update' and 'delete' operations as
-// tipically do not need to return anything. 
-// The update method updates a given record in teh database. The delete method removes a record from the database.
-
 public interface Dao<T> {
     // Define CRUD (Create, Retrieve, Update, Delete) operations
-    Optional<T> get(int id); // Retrieve an object by its id.
-    List<T> getAll(); // Retrieve all object in the system.
-    T insert(T t); // Insert a new object into the system and return it.
-    void update(T t); // Update an exiting object in the system.
-    void delete(T t); // Delete an object from system.
+    Optional<T> get(int id) throws SQLException; // Retrieve an object by its id.
+    List<T> getAll() throws SQLException; // Retrieve all object in the system.
+    T insert(T t) throws SQLException; // Insert a new object into the system and return it.
+    boolean update(T t) throws SQLException; // Update an exiting object in the system.
+    boolean delete(T t) throws SQLException; // Delete an object from system.
 }

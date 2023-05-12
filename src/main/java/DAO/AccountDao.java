@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 
 // Create a DAO classes for each table in the SocialMedia.sql database (Account, Message).
 // This class implements the CRUD (Create, Retrieve, Update, Delete) operartions for the Account table in the databse.
@@ -29,7 +31,7 @@ public class AccountDao implements Dao<Account> {
 
     // Retrieves an account by its ID
     @Override
-    public Optional<Account> get(int id){
+    public Optional<Account> get(int id) throws SQLException{
         // The try-with-resources statement is used for 'Conncection', 'PreparedStatement', and 'ResultSet' objects.
         // This ensure that each resourse will be properly closed even if an exception is thrown,
         // thereby helping to prevent resorce leaks in the application.
@@ -38,7 +40,7 @@ public class AccountDao implements Dao<Account> {
         String sql = "SELECT * FROM account WHERE account_id = ?";
         try (Connection conn = ConnectionUtil.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)){
-                ps.setLong(1, id);
+                ps.setInt(1, id);
                 // ResultSet is in a separate try block to ensure it gets closed after use,
                 // even if an exceprion is thrown during data processing. 
                 try(ResultSet rs = ps.executeQuery()){
@@ -51,14 +53,14 @@ public class AccountDao implements Dao<Account> {
                     }
                 }
         } catch (SQLException e){
-            System.out.println("Error message: " + e.getMessage());
+            throw new SQLException("Error while retrieveing the account", e);
         }
         return Optional.empty();
     }
 
     // Retrieves all accounts from the database
     @Override
-    public List<Account> getAll(){
+    public List<Account> getAll() throws SQLException{
         List<Account> accounts = new ArrayList<>();  
         String sql = "SELECT * FROM account";
         try(Connection conn = ConnectionUtil.getConnection();
@@ -74,26 +76,12 @@ public class AccountDao implements Dao<Account> {
                 }
             }
         } catch (SQLException e){
-            System.out.println("Error message: " + e.getMessage());
+            throw new SQLException("Error while retrieving all the account", e);
         }
         return accounts;
     }
 
-    /*
-     * 
-     * 
-     * work on this
-     */
-
-
-     // add away
-    //  public Account register(Account account){
-    //     if(account == null || account.getUsername() == null || account.getUsername().trim().isEmpty() || account.getPassword() == null || account.getPassword().length() < 4){
-    //         throw new IllegalArgumentException("Invalid account information");
-    //     }
-
-
-    public Optional<Account> findAccountByUsername(String username){
+    public Optional<Account> findAccountByUsername(String username) throws SQLException{
         
         String sql = "SELECT * FROM account WHERE username = ?";
 
@@ -110,84 +98,104 @@ public class AccountDao implements Dao<Account> {
                     }
                 }
             }catch (SQLException e){
-                System.out.println("Error message: " + e.getMessage());
+                throw new SQLException("Error while finding account by username", e);
             } 
             return Optional.empty();
         }
 
 
-    public Optional<Account> validateLogin(String username, String password){
+    public Optional<Account> validateLogin(String username, String password) throws SQLException{
+        String sql = "SELECT * FROM account WHERE username = ?";
 
-        String sql = "SELECT * FROM account WHERE username = ? AND password = ?";
-
-        try(Connection connection = ConnectionUtil.getConnection();
-            PreparedStatement ps = connection.prepareStatement(sql)){
+        try(Connection conn = ConnectionUtil.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)){
                 ps.setString(1, username);
-                ps.setString(2, password);
                 try(ResultSet rs = ps.executeQuery()){
                     if(rs.next()){ 
-                        return Optional.of(new Account(
+                        Account account = new Account(
                             rs.getInt("account_id"),
                             rs.getString("username"),
                             rs.getString("password")
-                        ));
+                        );
+                        if(BCrypt.checkpw(password, account.getPassword())){
+                            return Optional.of(account);
+                        }
                     }
                 }
             }catch (SQLException e){
-                    System.out.println("Error message: " + e.getMessage());
+                throw new SQLException("Error while validating login", e);
             } 
             return Optional.empty();
         }
 
+    public boolean doesUsernameExist(String username) throws SQLException{
+        String sql = "SELECT COUNT(*) FROM Account WHERE username = ?";
+        try (Connection conn = ConnectionUtil.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)){
+                ps.setString(1, username);
+                try (ResultSet rs = ps.executeQuery()){
+                    if(rs.next()){
+                        return rs.getInt(1) > 0;
+                    }
+                }
+                return false;
+            }
+        } 
 
 
     // Inserts a new account into the databse
     @Override
-    public Account insert(Account account){
+    public Account insert(Account account) throws SQLException{
         String sql = "INSERT INTO account (username, password) VALUES(?, ?)";
+        // Hash the password using BCcrypt. This ensure that we never store the actual password on the database.
+        String hashedPassword = BCrypt.hashpw(account.getPassword(), BCrypt.gensalt());
         try(Connection conn = ConnectionUtil.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
                 ps.setString(1, account.getUsername());
-                ps.setString(2, account.getPassword());
+                ps.setString(2, hashedPassword);
                 ps.executeUpdate();
 
                 // Retrieve the generated keys (auto-generated ID)
-                ResultSet generatedKeys = ps.getGeneratedKeys();
+                try(ResultSet generatedKeys = ps.getGeneratedKeys()){
                 if(generatedKeys.next()){
                     int generated_account_id = (int)generatedKeys.getInt(1);
-                    return new Account(generated_account_id, account.getUsername(), account.getPassword());
+                    // Returning the account with teh hashed password
+                    return new Account(generated_account_id, account.getUsername(), hashedPassword);
                 }
+            }
         } catch (SQLException e){
-            System.out.println("Error message: " + e.getMessage());
+            throw new SQLException("Error while inserting account", e);
         }
         return null;
     }
 
     // Updates an existing account in the database
     @Override
-    public void update(Account account){
+    public boolean update(Account account) throws SQLException{
         String sql = "UPDATE account SET username = ?, password = ? WHERE account_id = ?";
         try(Connection conn = ConnectionUtil.getConnection()){ 
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, account.getUsername());
-            ps.setString(2, account.getPassword());
+            ps.setString(2, account.getPassword()); // assuming password is already ashed
             ps.setInt(3, account.getAccount_id());
-            ps.executeUpdate();
+            int affectedRows = ps.executeUpdate();
+            return affectedRows > 0;
         } catch (SQLException e){
-            System.out.println("Error message: " + e.getMessage());
+            throw new SQLException("Error while updating the account", e);
         }
     }
 
     // Deletes an account from the database
     @Override
-    public void delete(Account account){
+    public boolean delete(Account account) throws SQLException{
         String sql = "DELETE FROM account WHERE account_id = ?";
         try(Connection conn = ConnectionUtil.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)){
                 ps.setInt(1, account.getAccount_id());
-                ps.executeUpdate();
+                int affectedRows = ps.executeUpdate();
+                return affectedRows >0;
         } catch (SQLException e){
-            System.out.println("Error message: " + e.getMessage());
+            throw new SQLException("Error while deleting the account", e);
         }
     }
 }

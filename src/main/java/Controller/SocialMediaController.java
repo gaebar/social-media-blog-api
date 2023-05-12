@@ -54,16 +54,19 @@ public class SocialMediaController {
 
     private void registerAccount(Context context){
         Account account = context.bodyAsClass(Account.class);
-        account = accountService.createAccount(account);
-        context.json(account);
+        Optional<Account> registeredAccount = accountService.register(account);
+        if(registerAccount.isPresent()){
+            context.json(registeredAccount.get());
+        } else {
+            context.status(400).result("Registration failed");
+        }
     }
 
     private void loginAccount(Context context){
-        String username = context.formParam("username");
-        String password = context.formParam("password");
-        Optional<Account> account = accountService.validateLogin(username, password);
-        if(account.isPresent()){
-            context.json(account.get());
+        Account account = context.bodyAsClass(Account.class);
+        Optional<Account> loggedInAccount = accountService.login(account);
+        if(loggedInAccount.isPresent()){
+            context.json(loggedInAccount.get());
         } else {
             context.status(401).result("Invalid credenntial");
         }
