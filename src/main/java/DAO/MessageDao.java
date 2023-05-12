@@ -51,7 +51,7 @@ public class MessageDao implements Dao<Message> {
                 }
             }
         } catch (SQLException e){
-            throw new SQLException("Error while retrieving a message by account ID", e);
+            throw new SQLException("Error while retrieving all messages", e);
         }
         return messages;
     }
@@ -113,7 +113,7 @@ public class MessageDao implements Dao<Message> {
             ps.setInt(4, message.getMessage_id());
             rowsUpdated = ps.executeUpdate();
         } catch (SQLException e){
-            throw new SQLException("Error while updating a message", e);
+            throw new SQLException("Error while updating the message", e);
         }
         return rowsUpdated >0;
     }
@@ -128,7 +128,7 @@ public class MessageDao implements Dao<Message> {
             ps.setInt(1, message.getMessage_id());
             rowsUpdated = ps.executeUpdate();
         } catch (SQLException e){
-            throw new SQLException("Error message while deleting a message", e);
+            throw new SQLException("Error message while deleting the message", e);
         }
         return rowsUpdated >0;
     }

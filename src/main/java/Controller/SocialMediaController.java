@@ -55,7 +55,7 @@ public class SocialMediaController {
     private void registerAccount(Context context){
         Account account = context.bodyAsClass(Account.class);
         Optional<Account> registeredAccount = accountService.register(account);
-        if(registerAccount.isPresent()){
+        if(registeredAccount.isPresent()){
             context.json(registeredAccount.get());
         } else {
             context.status(400).result("Registration failed");
@@ -68,7 +68,7 @@ public class SocialMediaController {
         if(loggedInAccount.isPresent()){
             context.json(loggedInAccount.get());
         } else {
-            context.status(401).result("Invalid credenntial");
+            context.status(401).result("Invalid credential");
         }
     }
 

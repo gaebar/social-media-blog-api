@@ -98,7 +98,7 @@ public class AccountDao implements Dao<Account> {
                     }
                 }
             }catch (SQLException e){
-                throw new SQLException("Error while finding account by username", e);
+                throw new SQLException("Error while finding account", e);
             } 
             return Optional.empty();
         }
@@ -147,20 +147,19 @@ public class AccountDao implements Dao<Account> {
     @Override
     public Account insert(Account account) throws SQLException{
         String sql = "INSERT INTO account (username, password) VALUES(?, ?)";
-        // Hash the password using BCcrypt. This ensure that we never store the actual password on the database.
-        String hashedPassword = BCrypt.hashpw(account.getPassword(), BCrypt.gensalt());
+        // Password is already hashed in the service layer
         try(Connection conn = ConnectionUtil.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
                 ps.setString(1, account.getUsername());
-                ps.setString(2, hashedPassword);
+                ps.setString(2, account.getPassword());
                 ps.executeUpdate();
 
                 // Retrieve the generated keys (auto-generated ID)
                 try(ResultSet generatedKeys = ps.getGeneratedKeys()){
                 if(generatedKeys.next()){
                     int generated_account_id = (int)generatedKeys.getInt(1);
-                    // Returning the account with teh hashed password
-                    return new Account(generated_account_id, account.getUsername(), hashedPassword);
+                    // Returning the account with the hashed password
+                    return new Account(generated_account_id, account.getUsername(), account.getPassword());
                 }
             }
         } catch (SQLException e){

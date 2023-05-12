@@ -1,17 +1,16 @@
 package Service;
 
-import Model.Account;
-import DAO.AccountDao;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
 
-import Util.ConnectionUtil;
+import org.mindrot.jbcrypt.BCrypt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import DAO.AccountDao;
+import Model.Account;
+
 
 /* The purpose of a Service class is to contain "business logic" that sits between the web layer (controller) 
     and persistence layer (DAO). 
@@ -24,6 +23,7 @@ import Util.ConnectionUtil;
 
 public class AccountService {
     private AccountDao accountDao;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AccountService.class);
 
     // Default constructor initializing the AccountDao object
     public AccountService(){
@@ -40,8 +40,8 @@ public class AccountService {
         try {
             return accountDao.get(id);
         } catch (SQLException e){
-            e.printStackTrace();
-            return Optional.empty(); // return an empty Optional if an excpion occurs
+            LOGGER.error("Exception occured while fetching account", e);
+            throw new ServiceException("Exception occured while fetching account", e);
         }
     }
 
@@ -50,8 +50,8 @@ public class AccountService {
         try {
         return accountDao.getAll();
         } catch (SQLException e){
-            e.printStackTrace();
-            return List.of(); // return an empty list on failure
+            LOGGER.error("Exception occured while fetching all accounts", e);
+            throw new ServiceException("Exception occured while fetching accounts", e);
         }
     }
 
@@ -60,8 +60,8 @@ public class AccountService {
         try{
             return accountDao.findAccountByUsername(username);
         } catch (SQLException e){
-            e.printStackTrace();
-            return Optional.empty();
+            LOGGER.error("Exception occured while finding account by username " + username, e);
+            throw new ServiceException("Exception occured while finding account by username " + username, e);
         }
     }
 
@@ -71,8 +71,8 @@ public class AccountService {
             Optional<Account> account = accountDao.validateLogin(username, password);
             return account;
         } catch (SQLException e){
-            e.printStackTrace();
-            return Optional.empty();
+            LOGGER.error("Exception occured while validating login by username " + username, e);
+            throw new ServiceException("Exception occured while validating login by username " + username, e);
         }
     }
 
@@ -80,23 +80,26 @@ public class AccountService {
     // Insert a new account into the database using the AccaountDao
     public Account createAccount(Account account){
         try {
-            if(account.getUsername().trim().isEmpty() || account.getPassword().length() < 4 || accountDao.doesUsernameExist((account.getUsername()))){
-                throw new IllegalArgumentException("Username can not be blank, password must be at least 4 characters long, and the username must be unique.");
-            }
+            validateAccount(account);
+            // Hash the password using BCcrypt. This ensure that we never store the actual password on the database.
+            String hashedPassword = BCrypt.hashpw(account.getPassword(), BCrypt.gensalt());
+            account.setPassword(hashedPassword);
             return accountDao.insert(account);
         } catch (SQLException e){
-            e.printStackTrace();
-            return null;
+            LOGGER.error("Exception occured while creating account", e);
+            throw new ServiceException("Exception occured while creating account", e);
         }
     }
 
     // Updates an existing account in the database using the AccountDao
     public boolean updateAccount(Account account){
         try{
+        String hashedPassword = BCrypt.hashpw(account.getPassword(), BCrypt.gensalt());
+        account.setPassword(hashedPassword);
         return accountDao.update(account);
         } catch (SQLException e){
-            e.printStackTrace();
-            return false;
+            LOGGER.error("Exception occured while updating account", e);
+            throw new ServiceException("Exception occured while while updating account", e);
         }
     }
 
@@ -108,8 +111,15 @@ public class AccountService {
         try {
             return accountDao.delete(account);
         } catch (SQLException e){
-            e.printStackTrace();
-            return false;
+            LOGGER.error("Exception occured while deleting account", e);
+            throw new ServiceException("Exception occured while while deleting account", e);
         }
     }
+
+    private void validateAccount(Account account){
+        if(account.getUsername().trim().isEmpty() || account.getPassword().length() < 4 || accountDao.doesUsernameExist((account.getUsername()))){
+            throw new IllegalArgumentException("Username can not be blank, password must be at least 4 characters long, and the username must be unique.");
+
+    }
+ }
 }
