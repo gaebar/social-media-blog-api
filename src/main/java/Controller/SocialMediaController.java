@@ -1,15 +1,15 @@
 package Controller;
 
-import Service.AccountService;
-import Service.MessageService;
-import Model.Account;
-import Model.Message;
-
-import io.javalin.Javalin;
-import io.javalin.http.Context;
-
 import java.util.List;
 import java.util.Optional;
+
+import Model.Account;
+import Model.Message;
+import Service.AccountService;
+import Service.MessageService;
+import Service.ServiceException;
+import io.javalin.Javalin;
+import io.javalin.http.Context;
 
 /**
  * TODO: You will need to write your own endpoints and handlers for your controller. The endpoints you will need can be
@@ -54,28 +54,41 @@ public class SocialMediaController {
 
     private void registerAccount(Context context){
         Account account = context.bodyAsClass(Account.class);
-        Optional<Account> registeredAccount = accountService.register(account);
-        if(registeredAccount.isPresent()){
-            context.json(registeredAccount.get());
-        } else {
+        try{
+            Account registeredAccount = accountService.createAccount(account);
+            context.json(registeredAccount);
+        } catch(ServiceException e){
             context.status(400).result("Registration failed");
-        }
+        } 
     }
 
     private void loginAccount(Context context){
         Account account = context.bodyAsClass(Account.class);
-        Optional<Account> loggedInAccount = accountService.login(account);
-        if(loggedInAccount.isPresent()){
-            context.json(loggedInAccount.get());
-        } else {
-            context.status(401).result("Invalid credential");
+        try{
+            Optional<Account> loggedInAccount = accountService.validateLogin(account.getUsername(), account.getPassword());
+            if(loggedInAccount.isPresent()){
+                context.json(loggedInAccount.get());
+            } else{
+                context.status(401).result("Invalid credential");
+            }
+        } catch(ServiceException e){
+            context.status(401).result("Login failed");
         }
     }
 
     private void createMessage(Context context){
-        Message message = context.bodyAsClass(Message.class);
-        message = messageService.createMessage(message);
-        context.json(message);
+        try{
+            Message message = context.bodyAsClass(Message.class);
+            Account account = context.sessionAttribute("logged_in_account");
+            if(account != null){
+                message = messageService.createMessage(message, account);
+                context.json(message);
+            } else {
+                context.status(401).result("User not logged in");
+            }
+          } catch(ServiceException e){
+            context.status(400).result("Failed to create message");
+        } 
     }
 
     private void getAllMessages(Context context){
@@ -94,31 +107,49 @@ public class SocialMediaController {
     }
 
     private void deleteMessageById(Context context){
-        int id = Integer.parseInt(context.pathParam("id"));
-        Optional<Message> message = messageService.getMessageById(id);
-        if(message.isPresent()){
-            messageService.deleteMessage(message.get());
-            context.status(204);
-        } else {
-            context.status(404);
+        try {
+            int id = Integer.parseInt(context.pathParam("id"));
+            Optional<Message> message = messageService.getMessageById(id);
+            Account account = context.sessionAttribute("logged_in_account");
+            if(message.isPresent() && account != null){
+                messageService.deleteMessage(message.get(), account);
+                context.status(204);
+            } else {
+                context.status(404);
+            }
+        } catch(ServiceException e){
+        context.status(400).result("Failed to delete message");
         }
+    } 
 
     private void updateMessageById(Context context){
-        int id = Integer.parseInt(context.pathParam("id"));
-        Message message = context.bodyAsClass(Message.class);
-        message.setMessageId(id);
-        messageService.updateMessage(message);
-        context.json(message);
+        try {
+            int id = Integer.parseInt(context.pathParam("id"));
+            Message message = context.bodyAsClass(Message.class);
+            Account account = context.sessionAttribute("logged_in_account");
+            if(account != null){
+                messageService.updateMessage(message, account);
+                context.json(message);
+            } else {
+                context.status(401).result("User not logged in");
+            }
+
+        } catch(ServiceException e){
+                context.status(400).result("Failed to update message");
+        } 
     }
 
     private void getMessagesByAccountId(Context context){
-        int accountId = Integer.parseInt(context.pathParam("id"));
-        List<Message> messages = messageService.getMessagesByAccountId(accountId);
-        if(!messages.isEmpty()){
-            context.json(messages);
-        } else{
-        context.json(messages);
-        }
+        try{
+            int accountId = Integer.parseInt(context.pathParam("id"));
+            List<Message> messages = messageService.getMessagesByAccountId(accountId);
+            if(!messages.isEmpty()){
+                context.json(messages);
+            } else{
+            context.status(404).result("No messages found");
+            }
+          } catch(ServiceException e){
+            context.status(400).result("Failed to retrieve messages");
+        } 
     }
-
 }
