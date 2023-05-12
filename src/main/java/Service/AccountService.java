@@ -25,7 +25,7 @@ import Util.ConnectionUtil;
 public class AccountService {
     private AccountDao accountDao;
 
-// Default constructor initializing the AccountDao object
+    // Default constructor initializing the AccountDao object
     public AccountService(){
         accountDao = new AccountDao();
     }
@@ -45,74 +45,15 @@ public class AccountService {
         return accountDao.getAll();
     }
 
-    public Account register(Account account){
-        if(account == null || account.getUsername() == null || account.getUsername().trim().isEmpty() || account.getPassword() == null || account.getPassword().length() < 4){
-            throw new IllegalArgumentException("Invalid account information");
-        }
-        
-        String sql = "SELECT * FROM account WHERE username = ?";
-
-        try(Connection connection = ConnectionUtil.getConnection();
-            PreparedStatement ps = connection.prepareStatement(sql)){
-                ps.setString(1, account.getUsername());
-                ResultSet rs = ps.executeQuery();
-
-                if(rs.next()){ // if result set is not empty, account with same username already exists
-                    throw new IllegalArgumentException("Username already exists");
-                }
-
-                sql = "INSERT INTO account(username, password) VALUES (?, ?)";
-                PreparedStatement psInsert = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS); // use the conncetion to create PreparedStatement
-                psInsert.setString(1, account.getUsername());
-                psInsert.setString(2, account.getPassword());
-                psInsert.executeUpdate();
-
-                try(ResultSet generatedKeys = psInsert.getGeneratedKeys()){
-                    if(generatedKeys.next()){
-                        account.setAccount_id(generatedKeys.getInt(1));
-                    }
-                    else {
-                        throw new SQLException("Creating account failde, no ID obtained.");
-                    }
-                }
-
-                return account; // return account after successful registration
-            } catch (SQLException e){
-                System.out.println("Error message: " + e.getMessage());
-                e.printStackTrace();
-            }
-
-            return null; // return null if registration failed
-
+    // Finds an account by username using the AccountDao
+    public Optional<Account> findAccountByUsername(String username){
+        return accountDao.findAccountByUsername(username);
     }
 
-    public Account login(Account account){
-        if(account == null || account.getUsername() == null || account.getPassword() == null){
-            throw new IllegalArgumentException("Account information cannot be null");
-        }
-
-        String sql = "SELECT * FROM account WHERE username = ? AND password = ?";
-
-        try(Connection connection = ConnectionUtil.getConnection();
-            PreparedStatement ps = connection.prepareStatement(sql)){
-                ps.setString(1, account.getUsername());
-                ps.setString(2, account.getPassword());
-                ResultSet rs = ps.executeQuery();
-
-                if(rs.next()){ // if result set is not empty, login is successful
-                    return new Account(rs.getInt("account_id"), rs.getString("username"), rs.getString("password")); // 
-                }else {
-                    throw new IllegalArgumentException("Invalid username or password");
-                }
-
-            } catch (SQLException e){
-                System.out.println("Error message: " + e.getMessage());
-                e.printStackTrace();
-            }
-
-            return null; // return null if login failed
+    // Validate login using the AccountDao
+    public Optional<Account> validateLogin(String username, String password){
+        return accountDao.validateLogin(username, password);
     }
-
 
 
     // Insert a new account into the database using the AccaountDao

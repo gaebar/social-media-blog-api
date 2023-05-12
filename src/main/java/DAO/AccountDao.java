@@ -71,14 +71,74 @@ public class AccountDao implements Dao<Account> {
                         rs.getString("password")
                     );
                     accounts.add(account);
-                
+                }
             }
-        }
         } catch (SQLException e){
             System.out.println("Error message: " + e.getMessage());
         }
         return accounts;
     }
+
+    /*
+     * 
+     * 
+     * work on this
+     */
+
+
+     // add away
+    //  public Account register(Account account){
+    //     if(account == null || account.getUsername() == null || account.getUsername().trim().isEmpty() || account.getPassword() == null || account.getPassword().length() < 4){
+    //         throw new IllegalArgumentException("Invalid account information");
+    //     }
+
+
+    public Optional<Account> findAccountByUsername(String username){
+        
+        String sql = "SELECT * FROM account WHERE username = ?";
+
+        try(Connection conn = ConnectionUtil.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)){
+                ps.setString(1, username);
+                try(ResultSet rs = ps.executeQuery()){
+                    if(rs.next()){ 
+                        return Optional.of(new Account(
+                            rs.getInt("account_id"),
+                            rs.getString("username"),
+                            rs.getString("password")
+                        ));
+                    }
+                }
+            }catch (SQLException e){
+                System.out.println("Error message: " + e.getMessage());
+            } 
+            return Optional.empty();
+        }
+
+
+    public Optional<Account> validateLogin(String username, String password){
+
+        String sql = "SELECT * FROM account WHERE username = ? AND password = ?";
+
+        try(Connection connection = ConnectionUtil.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql)){
+                ps.setString(1, username);
+                ps.setString(2, password);
+                try(ResultSet rs = ps.executeQuery()){
+                    if(rs.next()){ 
+                        return Optional.of(new Account(
+                            rs.getInt("account_id"),
+                            rs.getString("username"),
+                            rs.getString("password")
+                        ));
+                    }
+                }
+            }catch (SQLException e){
+                    System.out.println("Error message: " + e.getMessage());
+            } 
+            return Optional.empty();
+        }
+
 
 
     // Inserts a new account into the databse

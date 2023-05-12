@@ -41,6 +41,7 @@ public class SocialMediaController {
         app.delete("/messages/:id", this::deleteMessageById);
         app.patch("/messages/:id", this::updateMessageById);
         app.get("/accounts/:id/messages", this::getMessagesByAccountId);
+
         app.start(8080);
 
         return app;
@@ -53,14 +54,19 @@ public class SocialMediaController {
 
     private void registerAccount(Context context){
         Account account = context.bodyAsClass(Account.class);
-        account = accountService.register(account);
+        account = accountService.createAccount(account);
         context.json(account);
     }
 
     private void loginAccount(Context context){
-        Account account = context.bodyAsClass(Account.class);
-        account = accountService.login(account);
-        context.json(account);
+        String username = context.formParam("username");
+        String password = context.formParam("password");
+        Optional<Account> account = accountService.validateLogin(username, password);
+        if(account.isPresent()){
+            context.json(account.get());
+        } else {
+            context.status(401).result("Invalid credenntial");
+        }
     }
 
     private void createMessage(Context context){
