@@ -27,7 +27,7 @@ public class MessageDao implements Dao<Message> {
             // ResultSet is in a separate try block to ensure it gets closed after use,
             // even if an exceprion is thrown during data processing. 
             try(ResultSet rs = ps.executeQuery()){
-                while (rs.next()){
+                if (rs.next()){
                     message = new Message(rs.getInt("message_id"), rs.getInt("posted_by"), rs.getString("message_text"), rs.getLong("time_posted_epoch"));
                 }
             }
@@ -91,13 +91,13 @@ public class MessageDao implements Dao<Message> {
             try(ResultSet generatedKeys = ps.getGeneratedKeys()){
                 if(generatedKeys.next()){
                     int generatedId = generatedKeys.getInt(1);
-                    message.setMessage_id(generatedId);
+                    return new Message(generatedId, message.getPosted_by(), message.getMessage_text(), message.getTime_posted_epoch());
                 }
             }
         } catch (SQLException e){
             throw new SQLException("Error while inserting a message", e);
         }
-        return message;
+        return null;
     }
 
     // Update an existing message in the database

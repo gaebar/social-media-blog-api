@@ -37,12 +37,12 @@ public class SocialMediaController {
         app.post("/login", this::loginAccount);
         app.post("/messages", this::createMessage);
         app.get("/messages", this::getAllMessages);
-        app.get("/messages/:id", this::getMessageById);
-        app.delete("/messages/:id", this::deleteMessageById);
-        app.patch("/messages/:id", this::updateMessageById);
-        app.get("/accounts/:id/messages", this::getMessagesByAccountId);
+        app.get("/messages/{id}", this::getMessageById);
+        app.delete("/messages/{id}", this::deleteMessageById);
+        app.patch("/messages/{id}", this::updateMessageById);
+        app.get("/accounts/{id}/messages", this::getMessagesByAccountId);
 
-        app.start(8080);
+        //app.start(8080);
 
         return app;
     }
@@ -67,6 +67,7 @@ public class SocialMediaController {
         try{
             Optional<Account> loggedInAccount = accountService.validateLogin(account.getUsername(), account.getPassword());
             if(loggedInAccount.isPresent()){
+                context.sessionAttribute("logged_in_account", loggedInAccount.get());
                 context.json(loggedInAccount.get());
             } else{
                 context.status(401).result("Invalid credential");
@@ -97,12 +98,16 @@ public class SocialMediaController {
     }
 
     private void getMessageById(Context context){
-        int id = Integer.parseInt(context.pathParam("id"));
-        Optional<Message> message = messageService.getMessageById(id);
-        if(message.isPresent()){
-            context.json(message.get());
-        } else {
-            context.status(404);
+        try{
+            int id = Integer.parseInt(context.pathParam("id"));
+            Optional<Message> message = messageService.getMessageById(id);
+            if(message.isPresent()){
+                context.json(message.get());
+            } else {
+                context.status(404);
+            }
+        } catch(NumberFormatException e) {
+            context.status(400).result("Invalid message id format");
         }
     }
 
@@ -115,10 +120,12 @@ public class SocialMediaController {
                 messageService.deleteMessage(message.get(), account);
                 context.status(204);
             } else {
-                context.status(404);
+                context.status(404).result("No messages found");
             }
+        } catch(NumberFormatException e){
+            context.status(400).result("Invalid message id format");
         } catch(ServiceException e){
-        context.status(400).result("Failed to delete message");
+            context.status(400).result("Failed to retrieve message");
         }
     } 
 
@@ -126,9 +133,10 @@ public class SocialMediaController {
         try {
             int id = Integer.parseInt(context.pathParam("id"));
             Message message = context.bodyAsClass(Message.class);
+            message.setMessage_id(id);
             Account account = context.sessionAttribute("logged_in_account");
             if(account != null){
-                messageService.updateMessage(message, account);
+                message = messageService.updateMessage(id, message, account);
                 context.json(message);
             } else {
                 context.status(401).result("User not logged in");

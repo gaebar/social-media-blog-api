@@ -74,14 +74,16 @@ import Model.Message;
 
     // Update an existing message in the database using the MessageDao.
     //Checks account permissions to ensure that only the message author can update their own messages.
-    public void updateMessage(Message message, Account account){
+    public Message updateMessage(int id, Message message, Account account){
         if(message == null || account == null ){
             throw new ServiceException("Message and account cannot be null");
         }
         validateMessage(message);
         checkAccountPermission(account, message.getPosted_by());
+        message.setMessage_id(id);
         try {
-        messageDao.update(message);
+            messageDao.update(message);
+            return message;
         } catch (SQLException e){
             throw new ServiceException("Error accessing the database", e);
         }

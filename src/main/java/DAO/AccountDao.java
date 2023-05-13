@@ -161,11 +161,13 @@ public class AccountDao implements Dao<Account> {
                     // Returning the account with the hashed password
                     return new Account(generated_account_id, account.getUsername(), account.getPassword());
                 }
+                else{
+                    throw new SQLException("Creating account failed, no ID obtained.");
+                }
             }
         } catch (SQLException e){
             throw new SQLException("Error while inserting account", e);
         }
-        return null;
     }
 
     // Updates an existing account in the database
