@@ -177,10 +177,14 @@ public class AccountDao implements Dao<Account> {
         try(Connection conn = ConnectionUtil.getConnection()){ 
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, account.getUsername());
-            ps.setString(2, account.getPassword()); // assuming password is already ashed
+            ps.setString(2, account.getPassword()); // password is already ashed
             ps.setInt(3, account.getAccount_id());
             int affectedRows = ps.executeUpdate();
-            return affectedRows > 0;
+            if(affectedRows > 0){
+                return true;
+            } else {
+                throw new SQLException("Updating account failed, no such account found.");
+            }
         } catch (SQLException e){
             throw new SQLException("Error while updating the account", e);
         }

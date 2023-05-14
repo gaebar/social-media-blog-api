@@ -8,6 +8,9 @@ import DAO.MessageDao;
 import Model.Account;
 import Model.Message;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /* The Service class contains the business logic for the Message objects and sits sits between the web layer (controller) 
     and persistence layer (DAO). 
@@ -15,6 +18,8 @@ import Model.Message;
 
  public class MessageService {
     private MessageDao messageDao;
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageService.class);
+
 
 // Default constructor initializing the MessageDao object
     public MessageService(){
@@ -28,31 +33,42 @@ import Model.Message;
 
     //Retrieve a Message by its ID using the MessageDao
     public Optional<Message> getMessageById(int id){
+        LOGGER.info("Fetching message with ID: " + id);
         try{
             Optional <Message> message = messageDao.get(id);
             if(!message.isPresent()){
                 throw new ServiceException("Message not found");
             }
+            LOGGER.info("Fetched message: " + message.orElse(null));
             return message;
         } catch (SQLException e){
+            LOGGER.error("Error occured while fetching message", e);
             throw new ServiceException("Error accessing the database", e);
         }
     }
 
     // Retrieve all messages using the MessageDao
     public List<Message> getAllMessages(){
+        LOGGER.info("Fetching all messages");
         try{
-            return messageDao.getAll();
+            List<Message> messages = messageDao.getAll();
+            LOGGER.info("Fetched " + messages.size() + " messages");
+            return messages;
         } catch (SQLException e){
+            LOGGER.error("Error occured while fetching all messages", e);
             throw new ServiceException("Error accessing the database", e);
         }
     }
 
     // Retrieve all messages posted by a specific account
     public List<Message>getMessagesByAccountId(int accountId){
+        LOGGER.info("Fetching messages posted by ID account: " + accountId);
         try {
-        return messageDao.getMessagesByAccountId(accountId);
+            List<Message> messages = messageDao.getMessagesByAccountId(accountId);
+            LOGGER.info("Fetched " + messages.size() + " messages");
+            return messages;
         } catch (SQLException e){
+            LOGGER.error("Error occured while fetching all messages", e);
             throw new ServiceException("Error accessing the database", e);
         }
     }
@@ -60,14 +76,18 @@ import Model.Message;
     // Insert a new message into the database using the MessageDao/
     // Checks account permissions to ensure that only the message author can create messages on their behalf.
     public Message createMessage(Message message, Account account){
+        LOGGER.info("Creating message: " + message);
         if(message == null || account == null ){
             throw new ServiceException("Message and account cannot be null");
         }
         validateMessage(message);
         checkAccountPermission(account, message.getPosted_by());
         try{
-        return messageDao.insert(message);
+            Message createdMessage = messageDao.insert(message);
+            LOGGER.info("Created message: " + createdMessage);
+            return createdMessage;
         } catch (SQLException e){
+            LOGGER.error("Exception occured when creating message", e);
             throw new ServiceException("Error accessing the database", e);
         } 
     }
@@ -75,6 +95,7 @@ import Model.Message;
     // Update an existing message in the database using the MessageDao.
     //Checks account permissions to ensure that only the message author can update their own messages.
     public Message updateMessage(int id, Message message, Account account){
+        LOGGER.info("Updating message: " + message);
         if(message == null || account == null ){
             throw new ServiceException("Message and account cannot be null");
         }
@@ -83,8 +104,10 @@ import Model.Message;
         message.setMessage_id(id);
         try {
             messageDao.update(message);
+            LOGGER.info("Updated message: " + message);
             return message;
         } catch (SQLException e){
+            LOGGER.error("Exception occured when updating message", e);
             throw new ServiceException("Error accessing the database", e);
         }
     }
@@ -92,22 +115,27 @@ import Model.Message;
     // Delete an existing message from the database.
     // Check account permissions to ensure that only the message author can delete their own messages.
     public void deleteMessage(Message message, Account account){
+        LOGGER.info("Deleting message: " + message);
         if(message == null || account == null ){
             throw new ServiceException("Message and account cannot be null");
         }
         checkAccountPermission(account, message.getPosted_by());
         try {
-        messageDao.delete(message);
+            LOGGER.info("Deleted message: " + message);
+            messageDao.delete(message);
         } catch (SQLException e){
+            LOGGER.error("Exception occured while deleting message", e);
             throw new ServiceException("Error accessing the database", e);
         }
     }
 
     private void validateMessage(Message message){
+        LOGGER.info("Validating message: " + message);
         if(message.getMessage_text() == null || message.getMessage_text().trim().isEmpty()){
             throw new ServiceException("Message text cannot be null or empty");
         }
         if(message.getMessage_text().length() > 255){
+            // As this exception is likely to be caught it could be redundant to add a LOGGER here
             throw new ServiceException("Message text cannot exceed 255 characters");
         }
     }
@@ -115,7 +143,9 @@ import Model.Message;
     // Check if the account performing the action is the same as the one that posted the message.
     // This is used to mantain user data integrity and security.
     private void checkAccountPermission(Account account, int posted_by){
+        LOGGER.info("Checking account permissions for messages");
         if(account.getAccount_id()!= posted_by){
+            // As this exception is likely to be caught it could be redundant to add a LOGGER here
             throw new ServiceException("Account not authorized to modify this message");
         }
     }

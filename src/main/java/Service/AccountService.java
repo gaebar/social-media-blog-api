@@ -19,6 +19,9 @@ import Model.Account;
     Also, it has two constructors: a default constructor that initializes a new AccountDao object,
     and another that accepts an existing AccountDao object.
 
+    In this class, the logger object LOGGER is used to log different type of messages associated with the operations like
+    fetching, updating, creating, and deleting accounts. 
+
  */
 
 public class AccountService {
@@ -37,8 +40,11 @@ public class AccountService {
 
     //Retrieves an Account by its ID using the AccountDao
     public Optional<Account> getAccountById(int id){
+        LOGGER.info("Fetching account with ID: " + id);
         try {
-            return accountDao.get(id);
+            Optional <Account> account = accountDao.get(id);
+            LOGGER.info("Fetched account: " + account.orElse(null));
+            return account;
         } catch (SQLException e){
             LOGGER.error("Exception occured while fetching account", e);
             throw new ServiceException("Exception occured while fetching account", e);
@@ -47,8 +53,11 @@ public class AccountService {
 
     // Retrieves all accounts using the AccountDao
     public List<Account> getAllAccounts(){
+        LOGGER.info("Fetching all accounts");
         try {
-        return accountDao.getAll();
+            List<Account> accounts = accountDao.getAll();
+            LOGGER.info("Fetched " + accounts.size() + " accounts");
+            return accounts;
         } catch (SQLException e){
             LOGGER.error("Exception occured while fetching all accounts", e);
             throw new ServiceException("Exception occured while fetching accounts", e);
@@ -57,8 +66,11 @@ public class AccountService {
 
     // Finds an account by username using the AccountDao
     public Optional<Account> findAccountByUsername(String username){
+        LOGGER.info("Finding account by username: " + username);
         try{
-            return accountDao.findAccountByUsername(username);
+            Optional<Account> account = accountDao.findAccountByUsername(username);
+            LOGGER.info("Found account: " + account.orElse(null));
+            return account;
         } catch (SQLException e){
             LOGGER.error("Exception occured while finding account by username " + username, e);
             throw new ServiceException("Exception occured while finding account by username " + username, e);
@@ -67,8 +79,10 @@ public class AccountService {
 
     // Validate login using the AccountDao
     public Optional<Account> validateLogin(String username, String password){
+        LOGGER.info("Validating login for username: " + username);
         try{
             Optional<Account> account = accountDao.validateLogin(username, password);
+            LOGGER.info("Login validation result: " + account.isPresent());
             return account;
         } catch (SQLException e){
             LOGGER.error("Exception occured while validating login by username " + username, e);
@@ -79,12 +93,15 @@ public class AccountService {
 
     // Insert a new account into the database using the AccaountDao
     public Account createAccount(Account account){
+        LOGGER.info("Creating account: " + account);
         try {
             validateAccount(account);
             // Hash the password using BCcrypt. This ensure that we never store the actual password on the database.
             String hashedPassword = BCrypt.hashpw(account.getPassword(), BCrypt.gensalt());
             account.setPassword(hashedPassword);
-            return accountDao.insert(account);
+            Account createdAccount = accountDao.insert(account);
+            LOGGER.info("Created account: " + createdAccount);
+            return createdAccount;
         } catch (SQLException e){
             LOGGER.error("Exception occured while creating account", e);
             throw new ServiceException("Exception occured while creating account", e);
@@ -93,10 +110,13 @@ public class AccountService {
 
     // Updates an existing account in the database using the AccountDao
     public boolean updateAccount(Account account){
+        LOGGER.info("Updating account: " + account);
         try{
         String hashedPassword = BCrypt.hashpw(account.getPassword(), BCrypt.gensalt());
         account.setPassword(hashedPassword);
-        return accountDao.update(account);
+        boolean updated = accountDao.update(account);
+        LOGGER.info("Updated account: " + account + ". Update successful " + updated);
+        return updated;
         } catch (SQLException e){
             LOGGER.error("Exception occured while updating account", e);
             throw new ServiceException("Exception occured while while updating account", e);
@@ -105,11 +125,14 @@ public class AccountService {
 
     // Deletes an existing account from the database
     public boolean deleteAccount(Account account){
+        LOGGER.info("Deleting account: " + account);
         if(account.getAccount_id() == 0){
             throw new IllegalArgumentException("Account ID cannot be null");
         }
         try {
-            return accountDao.delete(account);
+            boolean deleted = accountDao.delete(account);
+            LOGGER.info("Deleted account: " + account + ". Deletion successful " + deleted);
+            return deleted;
         } catch (SQLException e){
             LOGGER.error("Exception occured while deleting account", e);
             throw new ServiceException("Exception occured while while deleting account", e);
@@ -117,6 +140,7 @@ public class AccountService {
     }
 
     private void validateAccount(Account account){
+        LOGGER.info("Validating account: " + account);
         try{
             if(account.getUsername().trim().isEmpty() || account.getPassword().length() < 4 || accountDao.doesUsernameExist((account.getUsername()))){
                 throw new IllegalArgumentException("Username can not be blank, password must be at least 4 characters long, and the username must be unique.");
@@ -129,9 +153,12 @@ public class AccountService {
 
     // Check if the user exist in the database base on their id
     public boolean accountExists(int accountId){
+        LOGGER.info("Cheching account exhitence with ID: " + accountId);
         try{
             Optional<Account> account = accountDao.get(accountId);
-            return account.isPresent();
+            boolean exists = account.isPresent();
+            LOGGER.info("Account existence: " + exists);
+            return exists;
         } catch (SQLException e){
                 LOGGER.error("Exception occured while checking account existence", e);
                 throw new ServiceException("Exception occured while checking account existence", e);
