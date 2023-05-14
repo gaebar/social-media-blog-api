@@ -67,9 +67,9 @@ public class SocialMediaController {
         try {
             Account registeredAccount = accountService.createAccount(account);
             ctx.json(mapper.writeValueAsString(registeredAccount));
-
+            // work here
         } catch (ServiceException e) {
-            ctx.status(200);
+            ctx.status(400);
         }
     }
 
@@ -91,7 +91,7 @@ public class SocialMediaController {
         }
     }
 
-    private void createMessage(Context ctx) {
+    private void createMessage(Context ctx) throws JsonProcessingException {
         try {
             Message message = ctx.bodyAsClass(Message.class);
             Account account = ctx.sessionAttribute("logged_in_account");
@@ -99,7 +99,7 @@ public class SocialMediaController {
                 message = messageService.createMessage(message, account);
                 ctx.json(message);
             } else {
-                ctx.status(401);
+                ctx.status(400);
             }
         } catch (ServiceException e) {
             ctx.status(400).result("Failed to create message");
@@ -107,11 +107,13 @@ public class SocialMediaController {
     }
 
     private void getAllMessages(Context ctx) {
+
         List<Message> messages = messageService.getAllMessages();
         ctx.json(messages);
+
     }
 
-    private void getMessageById(Context ctx) {
+    private void getMessageById(Context ctx) throws JsonProcessingException {
         try {
             int id = Integer.parseInt(ctx.pathParam("id"));
             Optional<Message> message = messageService.getMessageById(id);
@@ -125,7 +127,7 @@ public class SocialMediaController {
         }
     }
 
-    private void deleteMessageById(Context ctx) {
+    private void deleteMessageById(Context ctx) throws JsonProcessingException {
         try {
             int id = Integer.parseInt(ctx.pathParam("id"));
             Optional<Message> message = messageService.getMessageById(id);
@@ -143,7 +145,7 @@ public class SocialMediaController {
         }
     }
 
-    private void updateMessageById(Context ctx) {
+    private void updateMessageById(Context ctx) throws JsonProcessingException {
         try {
             int id = Integer.parseInt(ctx.pathParam("id"));
             Message message = ctx.bodyAsClass(Message.class);
@@ -153,7 +155,7 @@ public class SocialMediaController {
                 message = messageService.updateMessage(id, message, account);
                 ctx.json(message);
             } else {
-                ctx.status(401);
+                ctx.status(400);
             }
 
         } catch (ServiceException e) {
@@ -161,7 +163,7 @@ public class SocialMediaController {
         }
     }
 
-    private void getMessagesByAccountId(Context ctx) {
+    private void getMessagesByAccountId(Context ctx) throws JsonProcessingException {
         try {
             int accountId = Integer.parseInt(ctx.pathParam("id"));
             List<Message> messages = messageService.getMessagesByAccountId(accountId);
