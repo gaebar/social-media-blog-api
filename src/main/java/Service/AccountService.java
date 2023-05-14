@@ -74,51 +74,26 @@ public class AccountService {
 
     // Validate login using the AccountDao
     public Optional<Account> validateLogin(Account account) {
-        LOGGER.info("Validating login for username: " + username);
+        LOGGER.info("Validating login");
         try {
             Optional<Account> validatedAccount = accountDao.validateLogin(account.getUsername(),
                     account.getPassword());
-            LOGGER.info("Login validation result: " + account.isPresent());
-            if (validatedAccount.isPresent()) {
-                context.sessionAttribute("logged_in_account", validatedAccount.get());
-                context.json(validatedAccount.get());
-            } else {
-                context.status(401).result("Invalid credential");
-            }
-            return account;
+            LOGGER.info("Login validation result: " + validatedAccount.isPresent());
+            return validatedAccount;
         } catch (SQLException e) {
-            throw new ServiceException("Exception occured while validating login by username " + username, e);
+            throw new ServiceException("Exception occured while validating login", e);
         }
     }
-
-    /*
-     * private void loginAccount(Context context) {
-     * Account account = context.bodyAsClass(Account.class);
-     * try {
-     * Optional<Account> loggedInAccount =
-     * accountService.validateLogin(account.getUsername(),
-     * account.getPassword());
-     * if (loggedInAccount.isPresent()) {
-     * context.sessionAttribute("logged_in_account", loggedInAccount.get());
-     * context.json(loggedInAccount.get());
-     * } else {
-     * context.status(401).result("Invalid credential");
-     * }
-     * } catch (ServiceException e) {
-     * context.status(401).result("Login failed");
-     * }
-     * }
-     */
 
     // Insert a new account into the database using the AccaountDao
     public Account createAccount(Account account) {
         LOGGER.info("Creating account: " + account);
         try {
             validateAccount(account);
-            // Hash the password using BCcrypt. This ensure that we never store the actual
-            // password on the database.
-            String hashedPassword = BCrypt.hashpw(account.getPassword(), BCrypt.gensalt());
-            account.setPassword(hashedPassword);
+            Optional<Account> searchedAccount = findAccountByUsername(account.getUsername());
+            if (searchedAccount.isPresent()) {
+                throw new ServiceException("Account already exist");
+            }
             Account createdAccount = accountDao.insert(account);
             LOGGER.info("Created account: " + createdAccount);
             return createdAccount;

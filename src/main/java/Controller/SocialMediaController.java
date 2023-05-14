@@ -61,113 +61,116 @@ public class SocialMediaController {
      *                HTTP request and response.
      */
 
-    private void registerAccount(Context context) {
-        Account account = context.bodyAsClass(Account.class);
+    private void registerAccount(Context ctx) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        Account account = mapper.readValue(ctx.body(), Account.class);
         try {
             Account registeredAccount = accountService.createAccount(account);
-            context.json(registeredAccount);
+            ctx.json(registeredAccount);
         } catch (ServiceException e) {
-            context.status(400).result("Registration failed");
+            ctx.status(200);
         }
     }
 
     private void loginAccount(Context ctx) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper(); // it calls a default no-arg constructor from Model.Account - REQUIRED for Jackson ObjectMapper
+        ObjectMapper mapper = new ObjectMapper(); // it calls a default no-arg constructor from Model.Account - REQUIRED
+                                                  // for Jackson ObjectMapper
         Account account = mapper.readValue(ctx.body(), Account.class);
         Optional<Account> loggedInAccount = accountService.validateLogin(account);
-        try{
+        try {
             if (loggedInAccount.isPresent()) {
                 ctx.json(mapper.writeValueAsString(loggedInAccount));
                 ctx.sessionAttribute("logged_in_account", loggedInAccount.get());
                 ctx.json(loggedInAccount.get());
             } else {
-                ctx.status(401).result("Invalid credential");
+                ctx.status(401);
             }
         } catch (ServiceException e) {
             ctx.status(401).result("Login failed");
         }
+    }
 
-    private void createMessage(Context context) {
+    private void createMessage(Context ctx) {
         try {
-            Message message = context.bodyAsClass(Message.class);
-            Account account = context.sessionAttribute("logged_in_account");
+            Message message = ctx.bodyAsClass(Message.class);
+            Account account = ctx.sessionAttribute("logged_in_account");
             if (account != null) {
                 message = messageService.createMessage(message, account);
-                context.json(message);
+                ctx.json(message);
             } else {
-                context.status(401).result("User not logged in");
+                ctx.status(401);
             }
         } catch (ServiceException e) {
-            context.status(400).result("Failed to create message");
+            ctx.status(400).result("Failed to create message");
         }
     }
 
-    private void getAllMessages(Context context) {
+    private void getAllMessages(Context ctx) {
         List<Message> messages = messageService.getAllMessages();
-        context.json(messages);
+        ctx.json(messages);
     }
 
-    private void getMessageById(Context context) {
+    private void getMessageById(Context ctx) {
         try {
-            int id = Integer.parseInt(context.pathParam("id"));
+            int id = Integer.parseInt(ctx.pathParam("id"));
             Optional<Message> message = messageService.getMessageById(id);
             if (message.isPresent()) {
-                context.json(message.get());
+                ctx.json(message.get());
             } else {
-                context.status(404);
+                ctx.status(404);
             }
         } catch (NumberFormatException e) {
-            context.status(400).result("Invalid message id format");
+            ctx.status(400).result("Invalid message id format");
         }
     }
 
-    private void deleteMessageById(Context context) {
+    private void deleteMessageById(Context ctx) {
         try {
-            int id = Integer.parseInt(context.pathParam("id"));
+            int id = Integer.parseInt(ctx.pathParam("id"));
             Optional<Message> message = messageService.getMessageById(id);
-            Account account = context.sessionAttribute("logged_in_account");
+            Account account = ctx.sessionAttribute("logged_in_account");
             if (message.isPresent() && account != null) {
                 messageService.deleteMessage(message.get(), account);
-                context.status(204);
+                ctx.status(204);
             } else {
-                context.status(404).result("No messages found");
+                ctx.status(404);
             }
         } catch (NumberFormatException e) {
-            context.status(400).result("Invalid message id format");
+            ctx.status(400).result("Invalid message id format");
         } catch (ServiceException e) {
-            context.status(400).result("Failed to retrieve message");
+            ctx.status(400).result("Failed to retrieve message");
         }
     }
 
-    private void updateMessageById(Context context) {
+    private void updateMessageById(Context ctx) {
         try {
-            int id = Integer.parseInt(context.pathParam("id"));
-            Message message = context.bodyAsClass(Message.class);
+            int id = Integer.parseInt(ctx.pathParam("id"));
+            Message message = ctx.bodyAsClass(Message.class);
             message.setMessage_id(id);
-            Account account = context.sessionAttribute("logged_in_account");
+            Account account = ctx.sessionAttribute("logged_in_account");
             if (account != null) {
                 message = messageService.updateMessage(id, message, account);
-                context.json(message);
+                ctx.json(message);
             } else {
-                context.status(401).result("User not logged in");
+                ctx.status(401);
             }
 
         } catch (ServiceException e) {
-            context.status(400).result("Failed to update message");
+            ctx.status(400).result("Failed to update message");
         }
     }
 
-    private void getMessagesByAccountId(Context context) {
+    private void getMessagesByAccountId(Context ctx) {
         try {
-            int accountId = Integer.parseInt(context.pathParam("id"));
+            int accountId = Integer.parseInt(ctx.pathParam("id"));
             List<Message> messages = messageService.getMessagesByAccountId(accountId);
             if (!messages.isEmpty()) {
-                context.json(messages);
+                ctx.json(messages);
             } else {
-                context.status(404).result("No messages found");
+                ctx.status(404);
             }
         } catch (ServiceException e) {
-            context.status(400).result("Failed to retrieve messages");
+            ctx.status(400).result("Failed to retrieve messages");
         }
     }
 }
