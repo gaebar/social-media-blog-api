@@ -42,7 +42,6 @@ import org.slf4j.LoggerFactory;
             LOGGER.info("Fetched message: " + message.orElse(null));
             return message;
         } catch (SQLException e){
-            LOGGER.error("Error occured while fetching message", e);
             throw new ServiceException("Error accessing the database", e);
         }
     }
@@ -55,7 +54,6 @@ import org.slf4j.LoggerFactory;
             LOGGER.info("Fetched " + messages.size() + " messages");
             return messages;
         } catch (SQLException e){
-            LOGGER.error("Error occured while fetching all messages", e);
             throw new ServiceException("Error accessing the database", e);
         }
     }
@@ -68,7 +66,6 @@ import org.slf4j.LoggerFactory;
             LOGGER.info("Fetched " + messages.size() + " messages");
             return messages;
         } catch (SQLException e){
-            LOGGER.error("Error occured while fetching all messages", e);
             throw new ServiceException("Error accessing the database", e);
         }
     }
@@ -87,7 +84,6 @@ import org.slf4j.LoggerFactory;
             LOGGER.info("Created message: " + createdMessage);
             return createdMessage;
         } catch (SQLException e){
-            LOGGER.error("Exception occured when creating message", e);
             throw new ServiceException("Error accessing the database", e);
         } 
     }
@@ -107,7 +103,6 @@ import org.slf4j.LoggerFactory;
             LOGGER.info("Updated message: " + message);
             return message;
         } catch (SQLException e){
-            LOGGER.error("Exception occured when updating message", e);
             throw new ServiceException("Error accessing the database", e);
         }
     }
@@ -124,7 +119,6 @@ import org.slf4j.LoggerFactory;
             LOGGER.info("Deleted message: " + message);
             messageDao.delete(message);
         } catch (SQLException e){
-            LOGGER.error("Exception occured while deleting message", e);
             throw new ServiceException("Error accessing the database", e);
         }
     }
@@ -135,7 +129,6 @@ import org.slf4j.LoggerFactory;
             throw new ServiceException("Message text cannot be null or empty");
         }
         if(message.getMessage_text().length() > 255){
-            // As this exception is likely to be caught it could be redundant to add a LOGGER here
             throw new ServiceException("Message text cannot exceed 255 characters");
         }
     }
@@ -145,7 +138,6 @@ import org.slf4j.LoggerFactory;
     private void checkAccountPermission(Account account, int posted_by){
         LOGGER.info("Checking account permissions for messages");
         if(account.getAccount_id()!= posted_by){
-            // As this exception is likely to be caught it could be redundant to add a LOGGER here
             throw new ServiceException("Account not authorized to modify this message");
         }
     }

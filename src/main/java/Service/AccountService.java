@@ -12,16 +12,14 @@ import DAO.AccountDao;
 import Model.Account;
 
 
-/* The purpose of a Service class is to contain "business logic" that sits between the web layer (controller) 
-    and persistence layer (DAO). 
-
-    The AccountService class provides CRUD operations for the Account model by interacting with the AccountDao class.
-    Also, it has two constructors: a default constructor that initializes a new AccountDao object,
-    and another that accepts an existing AccountDao object.
-
-    In this class, the logger object LOGGER is used to log different type of messages associated with the operations like
-    fetching, updating, creating, and deleting accounts. 
-
+/* 
+    The AccountService class contains business logic for account operations, focusing on business logic validations. 
+    It interacts with the AccountDao class to perform CRUD operations on accounts. 
+    
+    The LOGGER object is used for logging various messages associated with account operations, such as fetching, updating, 
+    creating, and deleting accounts. In this context, exceptions thrown during business logic validations are expected and 
+    not indicative of system failures. Therefore, the use of LOGGER.error() or LOGGER.warn() in the catch blocks for logging 
+    is avoided to prevent redundancy and potential confusion.
  */
 
 public class AccountService {
@@ -46,7 +44,6 @@ public class AccountService {
             LOGGER.info("Fetched account: " + account.orElse(null));
             return account;
         } catch (SQLException e){
-            LOGGER.error("Exception occured while fetching account", e);
             throw new ServiceException("Exception occured while fetching account", e);
         }
     }
@@ -59,7 +56,6 @@ public class AccountService {
             LOGGER.info("Fetched " + accounts.size() + " accounts");
             return accounts;
         } catch (SQLException e){
-            LOGGER.error("Exception occured while fetching all accounts", e);
             throw new ServiceException("Exception occured while fetching accounts", e);
         }
     }
@@ -72,7 +68,6 @@ public class AccountService {
             LOGGER.info("Found account: " + account.orElse(null));
             return account;
         } catch (SQLException e){
-            LOGGER.error("Exception occured while finding account by username " + username, e);
             throw new ServiceException("Exception occured while finding account by username " + username, e);
         }
     }
@@ -85,7 +80,6 @@ public class AccountService {
             LOGGER.info("Login validation result: " + account.isPresent());
             return account;
         } catch (SQLException e){
-            LOGGER.error("Exception occured while validating login by username " + username, e);
             throw new ServiceException("Exception occured while validating login by username " + username, e);
         }
     }
@@ -103,7 +97,6 @@ public class AccountService {
             LOGGER.info("Created account: " + createdAccount);
             return createdAccount;
         } catch (SQLException e){
-            LOGGER.error("Exception occured while creating account", e);
             throw new ServiceException("Exception occured while creating account", e);
         }
     }
@@ -118,7 +111,6 @@ public class AccountService {
         LOGGER.info("Updated account: " + account + ". Update successful " + updated);
         return updated;
         } catch (SQLException e){
-            LOGGER.error("Exception occured while updating account", e);
             throw new ServiceException("Exception occured while while updating account", e);
         }
     }
@@ -134,7 +126,6 @@ public class AccountService {
             LOGGER.info("Deleted account: " + account + ". Deletion successful " + deleted);
             return deleted;
         } catch (SQLException e){
-            LOGGER.error("Exception occured while deleting account", e);
             throw new ServiceException("Exception occured while while deleting account", e);
         }
     }
@@ -146,7 +137,6 @@ public class AccountService {
                 throw new IllegalArgumentException("Username can not be blank, password must be at least 4 characters long, and the username must be unique.");
                 }
             } catch (SQLException e){
-                LOGGER.error("Exception occured while validating account", e);
                 throw new ServiceException("Exception occured while validating account", e);
         }
     }
@@ -160,7 +150,6 @@ public class AccountService {
             LOGGER.info("Account existence: " + exists);
             return exists;
         } catch (SQLException e){
-                LOGGER.error("Exception occured while checking account existence", e);
                 throw new ServiceException("Exception occured while checking account existence", e);
         }
     }
