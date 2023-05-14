@@ -92,15 +92,12 @@ public class SocialMediaController {
     }
 
     private void createMessage(Context ctx) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        Message mappedMessage = mapper.readValue(ctx.body(), Message.class);
         try {
-            Message message = ctx.bodyAsClass(Message.class);
-            Account account = ctx.sessionAttribute("logged_in_account");
-            if (account != null) {
-                message = messageService.createMessage(message, account);
-                ctx.json(message);
-            } else {
-                ctx.status(400);
-            }
+            Optional<Account> account = accountService.getAccountById(mappedMessage.getPosted_by());
+            Message message = messageService.createMessage(mappedMessage, account);
+            ctx.json(message);
         } catch (ServiceException e) {
             ctx.status(400).result("Failed to create message");
         }

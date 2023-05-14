@@ -43,7 +43,7 @@ public class AccountService {
             LOGGER.info("Fetched account: " + account.orElse(null));
             return account;
         } catch (SQLException e) {
-            throw new ServiceException("Exception occured while fetching account", e);
+            throw new ServiceException("Exception occurred while fetching account", e);
         }
     }
 
@@ -67,7 +67,7 @@ public class AccountService {
             LOGGER.info("Found account: " + account.orElse(null));
             return account;
         } catch (SQLException e) {
-            throw new ServiceException("Exception occured while finding account by username " + username, e);
+            throw new ServiceException("Exception occurred while finding account by username " + username, e);
         }
     }
 
@@ -144,7 +144,7 @@ public class AccountService {
         } catch (SQLException e) {
             throw new ServiceException("Exception occurred while validating account", e);
         }
-    }    
+    }
 
     // Check if the user exist in the database base on their id
     public boolean accountExists(int accountId) {
