@@ -4,7 +4,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,8 +105,7 @@ public class AccountService {
     public boolean updateAccount(Account account) {
         LOGGER.info("Updating account: " + account);
         try {
-            String hashedPassword = BCrypt.hashpw(account.getPassword(), BCrypt.gensalt());
-            account.setPassword(hashedPassword);
+            account.setPassword(account.password);
             boolean updated = accountDao.update(account);
             LOGGER.info("Updated account: " + account + ". Update successful " + updated);
             return updated;

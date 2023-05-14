@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.mindrot.jbcrypt.BCrypt;
-
 // Create a DAO classes for each table in the SocialMedia.sql database (Account, Message).
 // This class implements the CRUD (Create, Retrieve, Update, Delete) operartions for the Account table in the databse.
 // Each method creates a PreparedStatement object using the try-with-resourses, which helps prevent
