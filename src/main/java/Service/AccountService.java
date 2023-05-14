@@ -132,19 +132,23 @@ public class AccountService {
     private void validateAccount(Account account) {
         LOGGER.info("Validating account: " + account);
         try {
-            if (account.getUsername().trim().isEmpty() || account.getPassword().length() < 4
-                    || accountDao.doesUsernameExist((account.getUsername()))) {
-                throw new IllegalArgumentException(
-                        "Username can not be blank, password must be at least 4 characters long, and the username must be unique.");
+            if (account.getUsername().trim().isEmpty()) {
+                throw new ServiceException("Username can not be blank");
+            }
+            if (account.getPassword().length() < 4) {
+                throw new ServiceException("Password must be at least 4 characters long");
+            }
+            if (accountDao.doesUsernameExist(account.getUsername())) {
+                throw new ServiceException("The username must be unique");
             }
         } catch (SQLException e) {
             throw new ServiceException("Exception occurred while validating account", e);
         }
-    }
+    }    
 
     // Check if the user exist in the database base on their id
     public boolean accountExists(int accountId) {
-        LOGGER.info("Cheching account exhitence with ID: " + accountId);
+        LOGGER.info("Cheching account exitence with ID: " + accountId);
         try {
             Optional<Account> account = accountDao.get(accountId);
             boolean exists = account.isPresent();

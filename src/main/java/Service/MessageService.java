@@ -90,14 +90,14 @@ import org.slf4j.LoggerFactory;
 
     // Update an existing message in the database using the MessageDao.
     //Checks account permissions to ensure that only the message author can update their own messages.
-    public Message updateMessage(int id, Message message, Account account){
+    public Message updateMessage(int messageId, Message message, Account account){
         LOGGER.info("Updating message: " + message);
         if(message == null || account == null ){
             throw new ServiceException("Message and account cannot be null");
         }
         validateMessage(message);
         checkAccountPermission(account, message.getPosted_by());
-        message.setMessage_id(id);
+        message.setMessage_id(messageId);
         try {
             messageDao.update(message);
             LOGGER.info("Updated message: " + message);
@@ -116,8 +116,8 @@ import org.slf4j.LoggerFactory;
         }
         checkAccountPermission(account, message.getPosted_by());
         try {
-            LOGGER.info("Deleted message: " + message);
             messageDao.delete(message);
+            LOGGER.info("Deleted message " + message);
         } catch (SQLException e){
             throw new ServiceException("Error accessing the database", e);
         }
