@@ -21,7 +21,8 @@ public class MessageDao implements Dao<Message> {
         // The SQL string is outside the try block as it doesn't require closure like
         // Connection, PreparedStatement, or ResultSet.
         String sql = "SELECT * FROM message WHERE message_id = ?";
-        try (Connection conn = ConnectionUtil.getConnection();
+        Connection conn = ConnectionUtil.getConnection();
+        try (
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             // ResultSet is in a separate try block to ensure it gets closed after use,
@@ -44,7 +45,8 @@ public class MessageDao implements Dao<Message> {
     public List<Message> getAll() throws SQLException {
         List<Message> messages = new ArrayList<>();
         String sql = "SELECT * FROM message";
-        try (Connection conn = ConnectionUtil.getConnection();
+        Connection conn = ConnectionUtil.getConnection();
+        try (
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -62,7 +64,8 @@ public class MessageDao implements Dao<Message> {
     public List<Message> getMessagesByAccountId(int accountId) throws SQLException {
         List<Message> messages = new ArrayList<>();
         String sql = "SELECT * FROM message WHERE posted_by =?";
-        try (Connection conn = ConnectionUtil.getConnection();
+        Connection conn = ConnectionUtil.getConnection();
+        try (
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, accountId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -78,22 +81,32 @@ public class MessageDao implements Dao<Message> {
     }
 
     // Create a new message
+
+    // Create a new message
     @Override
     public Message insert(Message message) throws SQLException {
         String sql = "INSERT INTO message(posted_by, message_text, time_posted_epoch) VALUES (?, ?, ?)";
         Connection conn = ConnectionUtil.getConnection();
-
         try {
-            PreparedStatement ps = conn.prepareStatement(sql);
+            PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setInt(1, message.getPosted_by());
             ps.setString(2, message.getMessage_text());
             ps.setLong(3, message.getTime_posted_epoch());
 
             ps.executeUpdate();
-            return message;
+
+            // Retrieve the generated keys (auto-generated ID)
+            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    int generatedId = generatedKeys.getInt(1);
+                    return new Message(generatedId, message.getPosted_by(), message.getMessage_text(),
+                            message.getTime_posted_epoch());
+                }
+            }
         } catch (SQLException e) {
             throw new SQLException("Error while inserting a message", e);
         }
+        return null;
     }
 
     // Update an existing message in the database
@@ -101,8 +114,9 @@ public class MessageDao implements Dao<Message> {
     public boolean update(Message message) throws SQLException {
         String sql = "UPDATE message SET posted_by = ?, message_text = ?, time_posted_epoch = ? WHERE message_id =?";
         int rowsUpdated = 0;
-        try (Connection conn = ConnectionUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = ConnectionUtil.getConnection();
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, message.getPosted_by());
             ps.setString(2, message.getMessage_text());
             ps.setLong(3, message.getTime_posted_epoch());
@@ -119,8 +133,9 @@ public class MessageDao implements Dao<Message> {
     public boolean delete(Message message) throws SQLException {
         String sql = "DELETE FROM message WHERE message_id = ?";
         int rowsUpdated = 0;
-        try (Connection conn = ConnectionUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = ConnectionUtil.getConnection();
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, message.getMessage_id());
             rowsUpdated = ps.executeUpdate();
         } catch (SQLException e) {

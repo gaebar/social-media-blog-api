@@ -87,7 +87,7 @@ public class SocialMediaController {
                 ctx.status(401);
             }
         } catch (ServiceException e) {
-            ctx.status(401).result("Login failed");
+            ctx.status(401);
         }
     }
 
@@ -99,7 +99,7 @@ public class SocialMediaController {
             Message message = messageService.createMessage(mappedMessage, account);
             ctx.json(message);
         } catch (ServiceException e) {
-            ctx.status(400).result("Failed to create message");
+            ctx.status(400);
         }
     }
 
@@ -120,7 +120,7 @@ public class SocialMediaController {
                 ctx.status(404);
             }
         } catch (NumberFormatException e) {
-            ctx.status(400).result("Invalid message id format");
+            ctx.status(400);
         }
     }
 
@@ -136,9 +136,9 @@ public class SocialMediaController {
                 ctx.status(404);
             }
         } catch (NumberFormatException e) {
-            ctx.status(400).result("Invalid message id format");
+            ctx.status(400);
         } catch (ServiceException e) {
-            ctx.status(400).result("Failed to retrieve message");
+            ctx.status(400);
         }
     }
 
@@ -156,7 +156,7 @@ public class SocialMediaController {
             }
 
         } catch (ServiceException e) {
-            ctx.status(400).result("Failed to update message");
+            ctx.status(400);
         }
     }
 
@@ -170,7 +170,7 @@ public class SocialMediaController {
                 ctx.status(404);
             }
         } catch (ServiceException e) {
-            ctx.status(400).result("Failed to retrieve messages");
+            ctx.status(400);
         }
     }
 }
