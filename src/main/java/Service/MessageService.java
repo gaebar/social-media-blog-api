@@ -7,6 +7,7 @@ import java.util.Optional;
 import DAO.MessageDao;
 import Model.Account;
 import Model.Message;
+import io.javalin.http.NotFoundResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,6 +80,10 @@ public class MessageService {
             throw new ServiceException("Message and account cannot be null");
         }
 
+        if (message.getMessage_text().length() > 254) {
+            throw new ServiceException("Message cannot be over 254 characters");
+        }
+
         validateMessage(message);
         checkAccountPermission(account.get(), message.getPosted_by());
         try {
@@ -93,18 +98,18 @@ public class MessageService {
     // Update an existing message in the database using the MessageDao.
     // Checks account permissions to ensure that only the message author can update
     // their own messages.
-    public Message updateMessage(int messageId, Message message, Account account) {
-        LOGGER.info("Updating message: " + message);
-        if (message == null || account == null) {
-            throw new ServiceException("Message and account cannot be null");
-        }
-        validateMessage(message);
-        checkAccountPermission(account, message.getPosted_by());
-        message.setMessage_id(messageId);
+    public Message updateMessage(Message message) {
+        LOGGER.info("Updating message: " + message.getMessage_id());
+
+        Optional<Message> retrievedMessage = this.getMessageById(message.getMessage_id());
+        retrievedMessage.get().setMessage_text(message.getMessage_text());
+
+        validateMessage(retrievedMessage.get());
+
         try {
-            messageDao.update(message);
+            messageDao.update(retrievedMessage.get());
             LOGGER.info("Updated message: " + message);
-            return message;
+            return retrievedMessage.get();
         } catch (SQLException e) {
             throw new ServiceException("Error accessing the database", e);
         }
@@ -113,15 +118,19 @@ public class MessageService {
     // Delete an existing message from the database.
     // Check account permissions to ensure that only the message author can delete
     // their own messages.
-    public void deleteMessage(Message message, Account account) {
+    public void deleteMessage(Message message) {
         LOGGER.info("Deleting message: " + message);
-        if (message == null || account == null) {
+        if (message == null) {
             throw new ServiceException("Message and account cannot be null");
         }
-        checkAccountPermission(account, message.getPosted_by());
+        // checkAccountPermission(message.getPosted_by());
         try {
-            messageDao.delete(message);
-            LOGGER.info("Deleted message " + message);
+            boolean hasDeletedMessage = messageDao.delete(message);
+            if (hasDeletedMessage) {
+                LOGGER.info("Deleted message " + message);
+            } else {
+                throw new NotFoundResponse("Message to delete not found", null);
+            }
         } catch (SQLException e) {
             throw new ServiceException("Error accessing the database", e);
         }
@@ -132,7 +141,7 @@ public class MessageService {
         if (message.getMessage_text() == null || message.getMessage_text().trim().isEmpty()) {
             throw new ServiceException("Message text cannot be null or empty");
         }
-        if (message.getMessage_text().length() > 255) {
+        if (message.getMessage_text().length() > 254) {
             throw new ServiceException("Message text cannot exceed 255 characters");
         }
     }

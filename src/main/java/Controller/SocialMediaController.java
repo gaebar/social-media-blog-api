@@ -13,6 +13,7 @@ import Service.MessageService;
 import Service.ServiceException;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+import io.javalin.http.NotFoundResponse;
 
 /**
  * TODO: You will need to write your own endpoints and handlers for your
@@ -107,7 +108,6 @@ public class SocialMediaController {
 
         List<Message> messages = messageService.getAllMessages();
         ctx.json(messages);
-
     }
 
     private void getMessageById(Context ctx) throws JsonProcessingException {
@@ -117,10 +117,12 @@ public class SocialMediaController {
             if (message.isPresent()) {
                 ctx.json(message.get());
             } else {
-                ctx.status(404);
+                ctx.status(200);
             }
         } catch (NumberFormatException e) {
             ctx.status(400);
+        } catch (ServiceException e) {
+            ctx.status(200);
         }
     }
 
@@ -128,32 +130,35 @@ public class SocialMediaController {
         try {
             int id = Integer.parseInt(ctx.pathParam("id"));
             Optional<Message> message = messageService.getMessageById(id);
-            Account account = ctx.sessionAttribute("logged_in_account");
-            if (message.isPresent() && account != null) {
-                messageService.deleteMessage(message.get(), account);
-                ctx.status(204);
+            // Account account = ctx.sessionAttribute("logged_in_account");
+            if (message.isPresent()) {
+                messageService.deleteMessage(message.get());
+                ctx.status(200);
+                ctx.json(message.get());
             } else {
-                ctx.status(404);
+                ctx.status(200);
             }
-        } catch (NumberFormatException e) {
-            ctx.status(400);
         } catch (ServiceException e) {
-            ctx.status(400);
+            ctx.status(200);
         }
     }
 
     private void updateMessageById(Context ctx) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        Message mappedMessage = mapper.readValue(ctx.body(), Message.class);
         try {
             int id = Integer.parseInt(ctx.pathParam("id"));
-            Message message = ctx.bodyAsClass(Message.class);
-            message.setMessage_id(id);
-            Account account = ctx.sessionAttribute("logged_in_account");
-            if (account != null) {
-                message = messageService.updateMessage(id, message, account);
-                ctx.json(message);
-            } else {
-                ctx.status(400);
-            }
+            mappedMessage.setMessage_id(id);
+
+            // Message message = ctx.bodyAsClass(Message.class);
+            // message.setMessage_id(id);
+            // Account account = ctx.sessionAttribute("logged_in_account");
+            // if (account != null) {
+            Message messageUpdated = messageService.updateMessage(mappedMessage);
+            ctx.json(messageUpdated);
+            // } else {
+            // ctx.status(400);
+            // }
 
         } catch (ServiceException e) {
             ctx.status(400);
@@ -166,8 +171,9 @@ public class SocialMediaController {
             List<Message> messages = messageService.getMessagesByAccountId(accountId);
             if (!messages.isEmpty()) {
                 ctx.json(messages);
-            } else {
-                ctx.status(404);
+            } else { // if no messages
+                ctx.json(messages);
+                ctx.status(200);
             }
         } catch (ServiceException e) {
             ctx.status(400);
