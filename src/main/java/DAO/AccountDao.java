@@ -29,7 +29,7 @@ public class AccountDao implements Dao<Account> {
      * this case explicity.
      */
 
-    // Retrieves an account by its ID
+    // Retrieve an account by its ID from the database
     @Override
     public Optional<Account> get(int id) throws SQLException {
         // The try-with-resources statement is used for 'Conncection',
@@ -61,7 +61,7 @@ public class AccountDao implements Dao<Account> {
         return Optional.empty();
     }
 
-    // Retrieves all accounts from the database
+    // Retrieve all accounts from the database
     @Override
     public List<Account> getAll() throws SQLException {
         List<Account> accounts = new ArrayList<>();
@@ -83,7 +83,7 @@ public class AccountDao implements Dao<Account> {
         }
         return accounts;
     }
-
+    // Retrieve an account by its username from the database
     public Optional<Account> findAccountByUsername(String username) throws SQLException {
 
         String sql = "SELECT * FROM account WHERE username = ?";
@@ -106,6 +106,7 @@ public class AccountDao implements Dao<Account> {
         return Optional.empty();
     }
 
+    // Validate login credentials by checking if the provided username and password match an account in the database
     public Optional<Account> validateLogin(String username, String password) throws SQLException {
         String sql = "SELECT * FROM account WHERE username = ?";
         Connection conn = ConnectionUtil.getConnection();
@@ -120,7 +121,9 @@ public class AccountDao implements Dao<Account> {
                             rs.getString("username"),
                             rs.getString("password"));
 
+                    // Compare the provided password with the stored password in the Account object
                     if (Objects.equals(password, account.getPassword())) {
+                        // Return an Optional containing the authenticated Account
                         return Optional.of(account);
                     }
                 }
@@ -131,6 +134,7 @@ public class AccountDao implements Dao<Account> {
         return Optional.empty();
     }
 
+    // Check if a username already exists in the database
     public boolean doesUsernameExist(String username) throws SQLException {
         String sql = "SELECT COUNT(*) FROM Account WHERE username = ?";
         Connection conn = ConnectionUtil.getConnection();
@@ -150,11 +154,10 @@ public class AccountDao implements Dao<Account> {
         return false;
     }
 
-    // Inserts a new account into the database
+    // Insert a new account into the database
     @Override
     public Account insert(Account account) throws SQLException {
         String sql = "INSERT INTO account (username, password) VALUES(?, ?)";
-        // Password is already hashed in the service layer
         Connection conn = ConnectionUtil.getConnection();
         try {
             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -166,7 +169,6 @@ public class AccountDao implements Dao<Account> {
             try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     int generated_account_id = (int) generatedKeys.getInt(1);
-                    // Returning the account with the hashed password
                     return new Account(generated_account_id, account.getUsername(), account.getPassword());
                 } else {
                     throw new SQLException("Creating account failed, no ID obtained.");
@@ -185,7 +187,7 @@ public class AccountDao implements Dao<Account> {
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, account.getUsername());
-            ps.setString(2, account.getPassword()); // password is already ashed
+            ps.setString(2, account.getPassword());
             ps.setInt(3, account.getAccount_id());
             int affectedRows = ps.executeUpdate();
             if (affectedRows > 0) {

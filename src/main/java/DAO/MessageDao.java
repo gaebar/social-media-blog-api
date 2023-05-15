@@ -1,20 +1,23 @@
 package DAO;
 
-import Model.Message;
-import Util.ConnectionUtil;
-
-import java.sql.*;
-
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import Model.Message;
+import Util.ConnectionUtil;
 
 // This class implements the DAO for the Message table in the SocialMedia.sql database.
 // It provides the CRUD (Create, Retrieve, Update, Delete) operartions for messages.
 
 public class MessageDao implements Dao<Message> {
 
-    // Retrieve a specific message by its ID
+    // Retrieve a specific message by its ID from the database
     @Override
     public Optional<Message> get(int id) throws SQLException {
         Message message = null;
@@ -40,7 +43,7 @@ public class MessageDao implements Dao<Message> {
         return Optional.ofNullable(message);
     }
 
-    // Retrieve all message from the databse
+    // Retrieves all messages from the database
     @Override
     public List<Message> getAll() throws SQLException {
         List<Message> messages = new ArrayList<>();
@@ -60,7 +63,7 @@ public class MessageDao implements Dao<Message> {
         return messages;
     }
 
-    // Retrieve all messages posted by a specific account
+    // Retrieves all messages posted by a specific account from the database
     public List<Message> getMessagesByAccountId(int accountId) throws SQLException {
         List<Message> messages = new ArrayList<>();
         String sql = "SELECT * FROM message WHERE posted_by =?";
@@ -80,9 +83,7 @@ public class MessageDao implements Dao<Message> {
         return messages;
     }
 
-    // Create a new message
-
-    // Create a new message
+    // Insert a new message into the database
     @Override
     public Message insert(Message message) throws SQLException {
         String sql = "INSERT INTO message(posted_by, message_text, time_posted_epoch) VALUES (?, ?, ?)";
@@ -128,7 +129,7 @@ public class MessageDao implements Dao<Message> {
         return rowsUpdated > 0;
     }
 
-    // Delete a message by its ID
+    // Delete a message from the databse
     @Override
     public boolean delete(Message message) throws SQLException {
         String sql = "DELETE FROM message WHERE message_id = ?";
