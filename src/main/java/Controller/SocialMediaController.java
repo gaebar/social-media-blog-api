@@ -67,7 +67,6 @@ public class SocialMediaController {
         try {
             Account registeredAccount = accountService.createAccount(account);
             ctx.json(mapper.writeValueAsString(registeredAccount));
-            // work here
         } catch (ServiceException e) {
             ctx.status(400);
         }
