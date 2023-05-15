@@ -13,7 +13,6 @@ import Service.MessageService;
 import Service.ServiceException;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
-import io.javalin.http.NotFoundResponse;
 
 /**
  * TODO: You will need to write your own endpoints and handlers for your
