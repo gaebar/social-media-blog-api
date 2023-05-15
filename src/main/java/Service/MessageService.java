@@ -77,7 +77,7 @@ public class MessageService {
         LOGGER.info("Creating message: " + message);
 
         if (!account.isPresent()) {
-            throw new ServiceException("Message and account cannot be null");
+            throw new ServiceException("Account must exist when posting a new message");
         }
 
         if (message.getMessage_text().length() > 254) {
