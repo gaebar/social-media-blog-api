@@ -45,10 +45,10 @@ public class SocialMediaController {
         app.post("/login", this::loginAccount);
         app.post("/messages", this::createMessage);
         app.get("/messages", this::getAllMessages);
-        app.get("/messages/{id}", this::getMessageById);
-        app.delete("/messages/{id}", this::deleteMessageById);
-        app.patch("/messages/{id}", this::updateMessageById);
-        app.get("/accounts/{id}/messages", this::getMessagesByAccountId);
+        app.get("/messages/{message_id}", this::getMessageById);
+        app.delete("/messages/{message_id}", this::deleteMessageById);
+        app.patch("/messages/{message_id}", this::updateMessageById);
+        app.get("/accounts/{account_id}/messages", this::getMessagesByAccountId);
 
         return app;
 
@@ -110,7 +110,7 @@ public class SocialMediaController {
 
     private void getMessageById(Context ctx) throws JsonProcessingException {
         try {
-            int id = Integer.parseInt(ctx.pathParam("id"));
+            int id = Integer.parseInt(ctx.pathParam("message_id"));
             Optional<Message> message = messageService.getMessageById(id);
             if (message.isPresent()) {
                 ctx.json(message.get());
@@ -126,7 +126,7 @@ public class SocialMediaController {
 
     private void deleteMessageById(Context ctx) throws JsonProcessingException {
         try {
-            int id = Integer.parseInt(ctx.pathParam("id"));
+            int id = Integer.parseInt(ctx.pathParam("message_id"));
             Optional<Message> message = messageService.getMessageById(id);
             // Account account = ctx.sessionAttribute("logged_in_account");
             if (message.isPresent()) {
@@ -145,7 +145,7 @@ public class SocialMediaController {
         ObjectMapper mapper = new ObjectMapper();
         Message mappedMessage = mapper.readValue(ctx.body(), Message.class);
         try {
-            int id = Integer.parseInt(ctx.pathParam("id"));
+            int id = Integer.parseInt(ctx.pathParam("message_id"));
             mappedMessage.setMessage_id(id);
 
             // Message message = ctx.bodyAsClass(Message.class);
@@ -165,7 +165,7 @@ public class SocialMediaController {
 
     private void getMessagesByAccountId(Context ctx) throws JsonProcessingException {
         try {
-            int accountId = Integer.parseInt(ctx.pathParam("id"));
+            int accountId = Integer.parseInt(ctx.pathParam("account_id"));
             List<Message> messages = messageService.getMessagesByAccountId(accountId);
             if (!messages.isEmpty()) {
                 ctx.json(messages);
