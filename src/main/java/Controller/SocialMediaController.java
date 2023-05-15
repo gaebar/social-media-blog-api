@@ -61,6 +61,8 @@ public class SocialMediaController {
      *                HTTP request and response.
      */
 
+
+    // Deserializes the request body to an Account object and registers the account
     private void registerAccount(Context ctx) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         Account account = mapper.readValue(ctx.body(), Account.class);
@@ -72,6 +74,7 @@ public class SocialMediaController {
         }
     }
 
+    // Logs in an account by validating the credentials and setting session attributes
     private void loginAccount(Context ctx) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper(); // it calls a default no-arg constructor from Model.Account - REQUIRED
                                                   // for Jackson ObjectMapper
@@ -90,6 +93,7 @@ public class SocialMediaController {
         }
     }
 
+    // Creates a new message by deserializing the request body and associating it with an account
     private void createMessage(Context ctx) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         Message mappedMessage = mapper.readValue(ctx.body(), Message.class);
@@ -102,12 +106,15 @@ public class SocialMediaController {
         }
     }
 
+
+    // Retrieves all messages from the message service and sends them as a response
     private void getAllMessages(Context ctx) {
 
         List<Message> messages = messageService.getAllMessages();
         ctx.json(messages);
     }
 
+    // Retrieves a specific message by its ID from the message service and sends it as a response
     private void getMessageById(Context ctx) throws JsonProcessingException {
         try {
             int id = Integer.parseInt(ctx.pathParam("message_id"));
@@ -124,6 +131,7 @@ public class SocialMediaController {
         }
     }
 
+    // Deletes a specific message by its ID from the message service
     private void deleteMessageById(Context ctx) throws JsonProcessingException {
         try {
             int id = Integer.parseInt(ctx.pathParam("message_id"));
@@ -141,6 +149,7 @@ public class SocialMediaController {
         }
     }
 
+    // Update a specific message by its ID with new content
     private void updateMessageById(Context ctx) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         Message mappedMessage = mapper.readValue(ctx.body(), Message.class);
@@ -163,6 +172,7 @@ public class SocialMediaController {
         }
     }
 
+    // Retrieve all messages associated with a specific account ID and sends them as a response
     private void getMessagesByAccountId(Context ctx) throws JsonProcessingException {
         try {
             int accountId = Integer.parseInt(ctx.pathParam("account_id"));
