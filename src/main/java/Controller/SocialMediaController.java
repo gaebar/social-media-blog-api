@@ -20,6 +20,8 @@ public class SocialMediaController {
     private final MessageService messageService;
     private static final String MESSAGE_API_PATH = "/messages/{message_id}";
 
+    private static final String MESSAGE_ID_PARAM = "message_id";
+
     public SocialMediaController() {
         this.accountService = new AccountService();
         this.messageService = new MessageService();
@@ -70,9 +72,10 @@ public class SocialMediaController {
         ObjectMapper mapper = new ObjectMapper(); // it calls a default no-arg constructor from Model.Account - REQUIRED
                                                   // for Jackson ObjectMapper
         Account account = mapper.readValue(ctx.body(), Account.class);
-        Optional<Account> loggedInAccount = accountService
-                .validateLogin(account);
+
         try {
+            Optional<Account> loggedInAccount = accountService
+                    .validateLogin(account);
             if (loggedInAccount.isPresent()) {
                 ctx.json(mapper.writeValueAsString(loggedInAccount));
                 ctx.sessionAttribute("logged_in_account",
@@ -111,9 +114,9 @@ public class SocialMediaController {
 
     // Retrieves a specific message by its ID from the message service and sends it
     // as a response
-    private void getMessageById(Context ctx) throws JsonProcessingException {
+    private void getMessageById(Context ctx) {
         try {
-            int id = Integer.parseInt(ctx.pathParam("message_id"));
+            int id = Integer.parseInt(ctx.pathParam(MESSAGE_ID_PARAM));
             Optional<Message> message = messageService.getMessageById(id);
             if (message.isPresent()) {
                 ctx.json(message.get());
@@ -130,9 +133,8 @@ public class SocialMediaController {
     // Deletes a specific message by its ID from the message service
     private void deleteMessageById(Context ctx) {
         try {
-            int id = Integer.parseInt(ctx.pathParam("message_id"));
+            int id = Integer.parseInt(ctx.pathParam(MESSAGE_ID_PARAM));
             Optional<Message> message = messageService.getMessageById(id);
-            // Account account = ctx.sessionAttribute("logged_in_account");
             if (message.isPresent()) {
                 messageService.deleteMessage(message.get());
                 ctx.status(200);
@@ -150,7 +152,7 @@ public class SocialMediaController {
         ObjectMapper mapper = new ObjectMapper();
         Message mappedMessage = mapper.readValue(ctx.body(), Message.class);
         try {
-            int id = Integer.parseInt(ctx.pathParam("message_id"));
+            int id = Integer.parseInt(ctx.pathParam(MESSAGE_ID_PARAM));
             mappedMessage.setMessage_id(id);
 
             Message messageUpdated = messageService
@@ -164,8 +166,7 @@ public class SocialMediaController {
 
     // Retrieve all messages associated with a specific account ID and sends them as
     // a response
-    private void getMessagesByAccountId(Context ctx)
-            throws JsonProcessingException {
+    private void getMessagesByAccountId(Context ctx) {
         try {
             int accountId = Integer.parseInt(ctx.pathParam("account_id"));
             List<Message> messages = messageService
