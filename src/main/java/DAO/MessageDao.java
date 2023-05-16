@@ -17,13 +17,18 @@ import Util.ConnectionUtil;
 
 public class MessageDao implements Dao<Message> {
 
+    private static final String TIME_POSTED_EPOCH = "time_posted_epoch";
+    private static final String MESSAGE_ID = "message_id";
+    private static final String POSTED_BY = "posted_by";
+    private static final String MESSAGE_TEXT = "message_text";
+
     // Retrieve a specific message by its ID from the database
     @Override
     public Optional<Message> get(int id) {
         Message message = null;
         // The SQL string is outside the try block as it doesn't require closure like
         // Connection, PreparedStatement, or ResultSet.
-        String sql = "SELECT * FROM message WHERE message_id = ?";
+        String sql = "SELECT * FROM message WHERE " + MESSAGE_ID + " = ?";
         Connection conn = ConnectionUtil.getConnection();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -31,8 +36,7 @@ public class MessageDao implements Dao<Message> {
             // even if an exception is thrown during data processing.
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    message = new Message(rs.getInt("message_id"), rs.getInt("posted_by"), rs.getString("message_text"),
-                            rs.getLong("time_posted_epoch"));
+                    return Optional.of(mapResultSetToMessage(rs));
                 }
             }
         } catch (SQLException e) {
@@ -51,39 +55,36 @@ public class MessageDao implements Dao<Message> {
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    messages.add(new Message(rs.getInt("message_id"), rs.getInt("posted_by"),
-                            rs.getString("message_text"), rs.getLong("time_posted_epoch")));
+                    messages.add(mapResultSetToMessage(rs));
                 }
+            } catch (SQLException e) {
+                throw new DaoException("Error while retrieving all messages", e);
             }
         } catch (SQLException e) {
-            throw new DaoException("Error while retrieving all messages", e);
+            throw new DaoException("Error while preparing the statement or getting a connection", e);
         }
         return messages;
     }
 
     // Retrieves all messages posted by a specific account from the database
     public List<Message> getMessagesByAccountId(int accountId) {
-        List<Message> messages = new ArrayList<>();
-        String sql = "SELECT * FROM message WHERE posted_by =?";
+        String sql = "SELECT * FROM message WHERE " + POSTED_BY + " = ?";
         Connection conn = ConnectionUtil.getConnection();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, accountId);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    messages.add(new Message(rs.getInt("message_id"), rs.getInt("posted_by"),
-                            rs.getString("message_text"), rs.getLong("time_posted_epoch")));
-                }
+                return mapResultSetToList(rs);
             }
         } catch (SQLException e) {
-            throw new DaoException("Error while retrieving a message", e);
+            throw new DaoException("Error while retrieving a message by account ID", e);
         }
-        return messages;
     }
 
     // Insert a new message into the database
     @Override
     public Message insert(Message message) {
-        String sql = "INSERT INTO message(posted_by, message_text, time_posted_epoch) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO message(" + POSTED_BY + ", " + MESSAGE_TEXT + ", " + TIME_POSTED_EPOCH
+                + ") VALUES (?, ?, ?)";
         Connection conn = ConnectionUtil.getConnection();
         try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, message.getPosted_by());
@@ -109,7 +110,8 @@ public class MessageDao implements Dao<Message> {
     // Update an existing message in the database
     @Override
     public boolean update(Message message) {
-        String sql = "UPDATE message SET posted_by = ?, message_text = ?, time_posted_epoch = ? WHERE message_id =?";
+        String sql = "UPDATE message SET " + POSTED_BY + " = ?, " + MESSAGE_TEXT + " = ?, "
+                + TIME_POSTED_EPOCH + " = ? WHERE " + MESSAGE_ID + " = ?";
         int rowsUpdated = 0;
         Connection conn = ConnectionUtil.getConnection();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -127,7 +129,7 @@ public class MessageDao implements Dao<Message> {
     // Delete a message from the database
     @Override
     public boolean delete(Message message) {
-        String sql = "DELETE FROM message WHERE message_id = ?";
+        String sql = "DELETE FROM message WHERE " + MESSAGE_ID + " = ?";
         int rowsUpdated = 0;
         Connection conn = ConnectionUtil.getConnection();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -137,5 +139,23 @@ public class MessageDao implements Dao<Message> {
             throw new DaoException("Error while deleting the message", e);
         }
         return rowsUpdated > 0;
+    }
+
+    // Helper method to map ResultSet to Message object
+    private Message mapResultSetToMessage(ResultSet rs) throws SQLException {
+        int messageId = rs.getInt(MESSAGE_ID);
+        int postedBy = rs.getInt(POSTED_BY);
+        String messageText = rs.getString(MESSAGE_TEXT);
+        long timePostedEpoch = rs.getLong(TIME_POSTED_EPOCH);
+        return new Message(messageId, postedBy, messageText, timePostedEpoch);
+    }
+
+    // Helper method to map ResultSet to List of Message objects
+    private List<Message> mapResultSetToList(ResultSet rs) throws SQLException {
+        List<Message> messages = new ArrayList<>();
+        while (rs.next()) {
+            messages.add(mapResultSetToMessage(rs));
+        }
+        return messages;
     }
 }
