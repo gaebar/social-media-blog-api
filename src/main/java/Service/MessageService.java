@@ -39,7 +39,7 @@ public class MessageService {
             if (!message.isPresent()) {
                 throw new ServiceException("Message not found");
             }
-            LOGGER.info("Fetched message: " + message.orElse(null));
+            LOGGER.info("Fetched message: {}", message.orElse(null));
             return message;
         } catch (SQLException e) {
             throw new ServiceException("Error accessing the database", e);
@@ -51,7 +51,7 @@ public class MessageService {
         LOGGER.info("Fetching all messages");
         try {
             List<Message> messages = messageDao.getAll();
-            LOGGER.info("Fetched " + messages.size() + " messages");
+            LOGGER.info("Fetched {} messages", messages.size());
             return messages;
         } catch (SQLException e) {
             throw new ServiceException("Error accessing the database", e);
@@ -63,7 +63,7 @@ public class MessageService {
         LOGGER.info("Fetching messages posted by ID account: {}", accountId);
         try {
             List<Message> messages = messageDao.getMessagesByAccountId(accountId);
-            LOGGER.info("Fetched " + messages.size() + " messages");
+            LOGGER.info("Fetched {} messages", messages.size());
             return messages;
         } catch (SQLException e) {
             throw new ServiceException("Error accessing the database", e);
@@ -109,6 +109,11 @@ public class MessageService {
 
         // Retrieve the existing message by its ID
         Optional<Message> retrievedMessage = this.getMessageById(message.getMessage_id());
+
+        // Check if the message exists
+        if (!retrievedMessage.isPresent()) {
+            throw new ServiceException("Message not found");
+        }
 
         // Update the message text with the new value
         retrievedMessage.get().setMessage_text(message.getMessage_text());

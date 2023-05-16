@@ -46,13 +46,24 @@ public class SocialMediaController {
         app.post("/login", this::loginAccount);
         app.post("/messages", this::createMessage);
         app.get("/messages", this::getAllMessages);
-        app.get(MESSAGE_API_PATH, this::getMessageById);
-        app.delete(MESSAGE_API_PATH, this::deleteMessageById);
-        app.patch(MESSAGE_API_PATH, this::updateMessageById);
+        app.get(getMessageApiPath(), this::getMessageById);
+        app.delete(getMessageApiPath(), this::deleteMessageById);
+        app.patch(getMessageApiPath(), this::updateMessageById);
         app.get("/accounts/{account_id}/messages", this::getMessagesByAccountId);
 
         return app;
 
+    }
+
+    // Followed the SonarLint suggestions to customized getMessageApiPath() method,
+    // which returns the MESSAGE_API_PATH variable value. By using the
+    // getMessageApiPath() method
+    // instead of directly referencing the MESSAGE_API_PATH variable in the endpoint
+    // definitions,
+    // we ensure that the API path is consistent across the codebase and can be
+    // easily modified if required.
+    private String getMessageApiPath() {
+        return MESSAGE_API_PATH;
     }
 
     /**
