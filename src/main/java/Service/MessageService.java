@@ -12,8 +12,8 @@ import Model.Account;
 import Model.Message;
 import io.javalin.http.NotFoundResponse;
 
-/* The Service class contains the business logic for the Message objects and sits sits between the web layer (controller)
-    and persistence layer (DAO).
+/* The Service class contains the business logic for the Message objects and sits between the web layer (controller)
+    and the persistence layer (DAO).
  */
 
 public class MessageService {
