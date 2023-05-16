@@ -163,7 +163,7 @@ public class AccountDao implements Dao<Account> {
             // Retrieve the generated keys (auto-generated ID)
             try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    int generatedAccountId = (int) generatedKeys.getInt(1);
+                    int generatedAccountId = generatedKeys.getInt(1);
                     return new Account(generatedAccountId, account.getUsername(), account.getPassword());
                 } else {
                     throw new SQLException("Creating account failed, no ID obtained.");
