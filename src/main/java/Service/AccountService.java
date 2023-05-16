@@ -132,10 +132,18 @@ public class AccountService {
     private void validateAccount(Account account) {
         LOGGER.info("Validating account: {}", account);
         try {
-            if (account.getUsername().trim().isEmpty()) {
-                throw new ServiceException("Username can not be blank");
+
+            String username = account.getUsername().trim();
+            String password = account.getPassword().trim();
+
+            if (username.isEmpty()) {
+                throw new ServiceException("Username cannot be blank");
             }
-            if (account.getPassword().length() < 4) {
+            if (password.isEmpty()) {
+                throw new ServiceException("Password cannot be empty");
+            }
+
+            if (password.length() < 4) {
                 throw new ServiceException("Password must be at least 4 characters long");
             }
             if (accountDao.doesUsernameExist(account.getUsername())) {

@@ -132,7 +132,6 @@ public class MessageService {
     // their own messages.
     public void deleteMessage(Message message) {
         LOGGER.info("Deleting message: {}", message);
-        // checkAccountPermission(message.getPosted_by());
         try {
             boolean hasDeletedMessage = messageDao.delete(message);
             if (hasDeletedMessage) {
