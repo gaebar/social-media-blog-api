@@ -2,6 +2,8 @@ package DAO;
 
 import Model.Account;
 import Util.ConnectionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -21,6 +23,20 @@ import java.util.Optional;
 
 public class AccountDao implements Dao<Account> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AccountDao.class);
+
+    private static final String ACCOUNT_ID = "account_id";
+    private static final String USERNAME = "username";
+    private static final String PASSWORD = "password";
+
+    // Helper method to handle SQLException
+    private void handleSQLException(SQLException e, String sql, String errorMessage) {
+        LOGGER.error("SQLException Details: {}", e.getMessage());
+        LOGGER.error("SQL State: {}", e.getSQLState());
+        LOGGER.error("Error Code: {}", e.getErrorCode());
+        LOGGER.error("SQL: {}", sql);
+        throw new DaoException(errorMessage, e);
+    }
     /*
      * Option is used in the get method to handle the possibility that an account
      * may not exists in the database.
@@ -62,7 +78,7 @@ public class AccountDao implements Dao<Account> {
     @Override
     public Optional<Account> get(int id) {
 
-        String sql = "SELECT * FROM account WHERE account_id = ?";
+        String sql = "SELECT * FROM account WHERE " + ACCOUNT_ID + " = ?";
         Connection conn = ConnectionUtil.getConnection();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -71,13 +87,13 @@ public class AccountDao implements Dao<Account> {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return Optional.of(new Account(
-                            rs.getInt("account_id"),
-                            rs.getString("username"),
-                            rs.getString("password")));
+                            rs.getInt(ACCOUNT_ID),
+                            rs.getString(USERNAME),
+                            rs.getString(PASSWORD)));
                 }
             }
         } catch (SQLException e) {
-            throw new DaoException("Error while retrieving the account", e);
+            handleSQLException(e, sql, "Error while retrieving the account with id: " + id);
         }
         return Optional.empty();
     }
@@ -92,14 +108,14 @@ public class AccountDao implements Dao<Account> {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Account account = new Account(
-                            rs.getInt("account_id"),
-                            rs.getString("username"),
-                            rs.getString("password"));
+                            rs.getInt(ACCOUNT_ID),
+                            rs.getString(USERNAME),
+                            rs.getString(PASSWORD));
                     accounts.add(account);
                 }
             }
         } catch (SQLException e) {
-            throw new DaoException("Error while retrieving all the account", e);
+            handleSQLException(e, sql, "Error while retrieving all the accounts");
         }
         return accounts;
     }
@@ -107,7 +123,7 @@ public class AccountDao implements Dao<Account> {
     // Retrieve an account by its username from the database
     public Optional<Account> findAccountByUsername(String username) {
 
-        String sql = "SELECT * FROM account WHERE username = ?";
+        String sql = "SELECT * FROM account WHERE " + USERNAME + " = ?";
         Connection conn = ConnectionUtil.getConnection();
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -115,13 +131,13 @@ public class AccountDao implements Dao<Account> {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return Optional.of(new Account(
-                            rs.getInt("account_id"),
-                            rs.getString("username"),
-                            rs.getString("password")));
+                            rs.getInt(ACCOUNT_ID),
+                            rs.getString(USERNAME),
+                            rs.getString(PASSWORD)));
                 }
             }
         } catch (SQLException e) {
-            throw new DaoException("Error while finding account", e);
+            handleSQLException(e, sql, "Error while finding account with username: " + username);
         }
         return Optional.empty();
     }
@@ -129,7 +145,7 @@ public class AccountDao implements Dao<Account> {
     // Validate login credentials by checking if the provided username and password
     // match an account in the database
     public Optional<Account> validateLogin(String username, String password) {
-        String sql = "SELECT * FROM account WHERE username = ?";
+        String sql = "SELECT * FROM account WHERE " + USERNAME + " = ?";
         Connection conn = ConnectionUtil.getConnection();
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -137,9 +153,9 @@ public class AccountDao implements Dao<Account> {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     Account account = new Account(
-                            rs.getInt("account_id"),
-                            rs.getString("username"),
-                            rs.getString("password"));
+                            rs.getInt(ACCOUNT_ID),
+                            rs.getString(USERNAME),
+                            rs.getString(PASSWORD));
 
                     // Compare the provided password with the stored password in the Account object
                     if (Objects.equals(password, account.getPassword())) {
@@ -149,14 +165,14 @@ public class AccountDao implements Dao<Account> {
                 }
             }
         } catch (SQLException e) {
-            throw new DaoException("Error while validating login", e);
+            handleSQLException(e, sql, "Error while validating login for username: " + username);
         }
         return Optional.empty();
     }
 
     // Check if a username already exists in the database
     public boolean doesUsernameExist(String username) {
-        String sql = "SELECT COUNT(*) FROM Account WHERE username = ?";
+        String sql = "SELECT COUNT(*) FROM Account WHERE " + USERNAME + " = ?";
         Connection conn = ConnectionUtil.getConnection();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, username);
@@ -165,10 +181,10 @@ public class AccountDao implements Dao<Account> {
                     return rs.getInt(1) > 0;
                 }
             } catch (SQLException e) {
-                throw new DaoException("Error while checking if username exists", e);
+                handleSQLException(e, sql, "Error while checking if username exists: " + username);
             }
         } catch (SQLException e) {
-            throw new DaoException("Error while establishing connection", e);
+            handleSQLException(e, sql, "Error while establishing connection");
         }
         return false;
     }
@@ -176,7 +192,7 @@ public class AccountDao implements Dao<Account> {
     // Insert a new account into the database
     @Override
     public Account insert(Account account) {
-        String sql = "INSERT INTO account (username, password) VALUES(?, ?)";
+        String sql = "INSERT INTO account (" + USERNAME + ", " + PASSWORD + ") VALUES(?, ?)";
         Connection conn = ConnectionUtil.getConnection();
         try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, account.getUsername());
@@ -193,14 +209,15 @@ public class AccountDao implements Dao<Account> {
                 }
             }
         } catch (SQLException e) {
-            throw new DaoException("Error while inserting account", e);
+            handleSQLException(e, sql, "Error while inserting account: " + account.toString());
+            throw new DaoException("Creating account failed due to SQL error", e);
         }
     }
 
     // Updates an existing account in the database
     @Override
     public boolean update(Account account) {
-        String sql = "UPDATE account SET username = ?, password = ? WHERE account_id = ?";
+        String sql = "UPDATE account SET " + USERNAME + " = ?, " + PASSWORD + " = ? WHERE " + ACCOUNT_ID + " = ?";
         Connection conn = ConnectionUtil.getConnection();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, account.getUsername());
@@ -213,21 +230,23 @@ public class AccountDao implements Dao<Account> {
                 throw new DaoException("Updating account failed, no such account found.");
             }
         } catch (SQLException e) {
-            throw new DaoException("Error while updating the account", e);
+            handleSQLException(e, sql, "Error while updating the account: " + account.toString());
+            throw new DaoException("Updating account failed due to SQL error", e);
         }
     }
 
     // Deletes an account from the database
     @Override
     public boolean delete(Account account) {
-        String sql = "DELETE FROM account WHERE account_id = ?";
+        String sql = "DELETE FROM account WHERE " + ACCOUNT_ID + " = ?";
         Connection conn = ConnectionUtil.getConnection();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, account.getAccount_id());
             int affectedRows = ps.executeUpdate();
             return affectedRows > 0;
         } catch (SQLException e) {
-            throw new DaoException("Error while deleting the account", e);
+            handleSQLException(e, sql, "Error while deleting the account: " + account.toString());
+            throw new DaoException("Deleting account failed due to SQL error", e);
         }
     }
 }
