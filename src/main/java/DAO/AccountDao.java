@@ -11,8 +11,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 // Create a DAO classes for each table in the SocialMedia.sql database (Account, Message).
-// This class implements the CRUD (Create, Retrieve, Update, Delete) operartions for the Account table in the databse.
-// Each method creates a PreparedStatement object using the try-with-resourses, which helps prevent
+// This class implements the CRUD (Create, Retrieve, Update, Delete) operations for the Account table in the database.
+// Each method creates a PreparedStatement object using the try-with-resources, which helps prevent
 // resource leaks.
 
 public class AccountDao implements Dao<Account> {
@@ -21,22 +21,21 @@ public class AccountDao implements Dao<Account> {
      * Option is used in the get method to handle the possibility that an account
      * may not exists in the database.
      * Instead of returning null, which can cause problems such as
-     * NullPointerExceprions, the methode retun an
-     * Optional <Account>.
+     * NullPointerExceptions, the method return an Optional <Account>.
      *
-     * This Allows us to clearly communicate that an account might be absennt and
+     * This Allows us to clearly communicate that an account might be absent and
      * forces the calling code to handle
-     * this case explicity.
+     * this case explicitly.
      */
 
     // Retrieve an account by its ID from the database
     @Override
     public Optional<Account> get(int id) throws SQLException {
-        // The try-with-resources statement is used for 'Conncection',
+        // The try-with-resources statement is used for 'Connection',
         // 'PreparedStatement', and 'ResultSet' objects.
-        // This ensure that each resourse will be properly closed even if an exception
+        // This ensure that each resource will be properly closed even if an exception
         // is thrown,
-        // thereby helping to prevent resorce leaks in the application.
+        // thereby helping to prevent resource leaks in the application.
 
         // The SQL string is outside the try block as it doesn't require closure like
         // Connection, PreparedStatement, or ResultSet.
@@ -46,7 +45,7 @@ public class AccountDao implements Dao<Account> {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, id);
             // ResultSet is in a separate try block to ensure it gets closed after use,
-            // even if an exceprion is thrown during data processing.
+            // even if an exception is thrown during data processing.
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return Optional.of(new Account(
@@ -83,6 +82,7 @@ public class AccountDao implements Dao<Account> {
         }
         return accounts;
     }
+
     // Retrieve an account by its username from the database
     public Optional<Account> findAccountByUsername(String username) throws SQLException {
 
@@ -106,7 +106,8 @@ public class AccountDao implements Dao<Account> {
         return Optional.empty();
     }
 
-    // Validate login credentials by checking if the provided username and password match an account in the database
+    // Validate login credentials by checking if the provided username and password
+    // match an account in the database
     public Optional<Account> validateLogin(String username, String password) throws SQLException {
         String sql = "SELECT * FROM account WHERE username = ?";
         Connection conn = ConnectionUtil.getConnection();

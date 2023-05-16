@@ -37,10 +37,10 @@ public class AccountService {
 
     // Retrieves an Account by its ID using the AccountDao
     public Optional<Account> getAccountById(int id) {
-        LOGGER.info("Fetching account with ID: " + id);
+        LOGGER.info("Fetching account with ID: {}", id);
         try {
             Optional<Account> account = accountDao.get(id);
-            LOGGER.info("Fetched account: " + account.orElse(null));
+            LOGGER.info("Fetched account: {}", account.orElse(null));
             return account;
         } catch (SQLException e) {
             throw new ServiceException("Exception occurred while fetching account", e);
@@ -52,19 +52,19 @@ public class AccountService {
         LOGGER.info("Fetching all accounts");
         try {
             List<Account> accounts = accountDao.getAll();
-            LOGGER.info("Fetched " + accounts.size() + " accounts");
+            LOGGER.info("Fetched {} accounts", accounts.size());
             return accounts;
         } catch (SQLException e) {
-            throw new ServiceException("Exception occured while fetching accounts", e);
+            throw new ServiceException("Exception occurred while fetching accounts", e);
         }
     }
 
     // Finds an account by username using the AccountDao
     public Optional<Account> findAccountByUsername(String username) {
-        LOGGER.info("Finding account by username: " + username);
+        LOGGER.info("Finding account by username: {}", username);
         try {
             Optional<Account> account = accountDao.findAccountByUsername(username);
-            LOGGER.info("Found account: " + account.orElse(null));
+            LOGGER.info("Found account: {}", account.orElse(null));
             return account;
         } catch (SQLException e) {
             throw new ServiceException("Exception occurred while finding account by username " + username, e);
@@ -77,16 +77,16 @@ public class AccountService {
         try {
             Optional<Account> validatedAccount = accountDao.validateLogin(account.getUsername(),
                     account.getPassword());
-            LOGGER.info("Login validation result: " + validatedAccount.isPresent());
+            LOGGER.info("Login validation result: {}", validatedAccount.isPresent());
             return validatedAccount;
         } catch (SQLException e) {
-            throw new ServiceException("Exception occured while validating login", e);
+            throw new ServiceException("Exception occurred while validating login", e);
         }
     }
 
-    // Insert a new account into the database using the AccaountDao
+    // Insert a new account into the database using the AccountDao
     public Account createAccount(Account account) {
-        LOGGER.info("Creating account: " + account);
+        LOGGER.info("Creating account: {}", account);
         try {
             validateAccount(account);
             Optional<Account> searchedAccount = findAccountByUsername(account.getUsername());
@@ -94,43 +94,43 @@ public class AccountService {
                 throw new ServiceException("Account already exist");
             }
             Account createdAccount = accountDao.insert(account);
-            LOGGER.info("Created account: " + createdAccount);
+            LOGGER.info("Created account: {}", createdAccount);
             return createdAccount;
         } catch (SQLException e) {
-            throw new ServiceException("Exception occured while creating account", e);
+            throw new ServiceException("Exception occurred while creating account", e);
         }
     }
 
     // Updates an existing account in the database using the AccountDao
     public boolean updateAccount(Account account) {
-        LOGGER.info("Updating account: " + account);
+        LOGGER.info("Updating account: {}", account);
         try {
             account.setPassword(account.password);
             boolean updated = accountDao.update(account);
-            LOGGER.info("Updated account: " + account + ". Update successful " + updated);
+            LOGGER.info("Updated account: {}. Update successful {}", account, updated);
             return updated;
         } catch (SQLException e) {
-            throw new ServiceException("Exception occured while while updating account", e);
+            throw new ServiceException("Exception occurred while while updating account", e);
         }
     }
 
     // Deletes an existing account from the database
     public boolean deleteAccount(Account account) {
-        LOGGER.info("Deleting account: " + account);
+        LOGGER.info("Deleting account: {}", account);
         if (account.getAccount_id() == 0) {
             throw new IllegalArgumentException("Account ID cannot be null");
         }
         try {
             boolean deleted = accountDao.delete(account);
-            LOGGER.info("Deleted account: " + account + ". Deletion successful " + deleted);
+            LOGGER.info("Deleted account: {} . Deletion successful {}", account, deleted);
             return deleted;
         } catch (SQLException e) {
-            throw new ServiceException("Exception occured while while deleting account", e);
+            throw new ServiceException("Exception occurred while while deleting account", e);
         }
     }
 
     private void validateAccount(Account account) {
-        LOGGER.info("Validating account: " + account);
+        LOGGER.info("Validating account: {}", account);
         try {
             if (account.getUsername().trim().isEmpty()) {
                 throw new ServiceException("Username can not be blank");
@@ -148,14 +148,14 @@ public class AccountService {
 
     // Check if the user exist in the database base on their id
     public boolean accountExists(int accountId) {
-        LOGGER.info("Cheching account exitence with ID: " + accountId);
+        LOGGER.info("Checking account existence with ID: {}", accountId);
         try {
             Optional<Account> account = accountDao.get(accountId);
             boolean exists = account.isPresent();
-            LOGGER.info("Account existence: " + exists);
+            LOGGER.info("Account existence: {}", exists);
             return exists;
         } catch (SQLException e) {
-            throw new ServiceException("Exception occured while checking account existence", e);
+            throw new ServiceException("Exception occurred while checking account existence", e);
         }
     }
 }

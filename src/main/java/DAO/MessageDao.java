@@ -13,7 +13,7 @@ import Model.Message;
 import Util.ConnectionUtil;
 
 // This class implements the DAO for the Message table in the SocialMedia.sql database.
-// It provides the CRUD (Create, Retrieve, Update, Delete) operartions for messages.
+// It provides the CRUD (Create, Retrieve, Update, Delete) operations for messages.
 
 public class MessageDao implements Dao<Message> {
 
@@ -29,7 +29,7 @@ public class MessageDao implements Dao<Message> {
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             // ResultSet is in a separate try block to ensure it gets closed after use,
-            // even if an exceprion is thrown during data processing.
+            // even if an exception is thrown during data processing.
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     message = new Message(rs.getInt("message_id"), rs.getInt("posted_by"), rs.getString("message_text"),
@@ -37,7 +37,7 @@ public class MessageDao implements Dao<Message> {
                 }
             }
         } catch (SQLException e) {
-            throw new SQLException("Error while retrievening the message", e);
+            throw new SQLException("Error while retrieving the message", e);
         }
         // If the message is not found an empty Optional is returned
         return Optional.ofNullable(message);
@@ -78,7 +78,7 @@ public class MessageDao implements Dao<Message> {
                 }
             }
         } catch (SQLException e) {
-            throw new SQLException("Error while retriving a message", e);
+            throw new SQLException("Error while retrieving a message", e);
         }
         return messages;
     }
@@ -129,7 +129,7 @@ public class MessageDao implements Dao<Message> {
         return rowsUpdated > 0;
     }
 
-    // Delete a message from the databse
+    // Delete a message from the database
     @Override
     public boolean delete(Message message) throws SQLException {
         String sql = "DELETE FROM message WHERE message_id = ?";
