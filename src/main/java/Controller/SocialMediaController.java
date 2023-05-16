@@ -14,18 +14,7 @@ import Service.ServiceException;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 
-/**
- * TODO: You will need to write your own endpoints and handlers for your controller. The endpoints you will need can be
- * found in readme.md as well as the test cases. You should refer to prior mini-project labs and lecture materials for
- * guidance on how a controller may be built.
- */
 public class SocialMediaController {
-    /**
-     * In order for the test cases to work, you will need to write the endpoints in the startAPI() method, as the test suite
-     * must receive a Javalin object from this method.
-     *
-     * @return a Javalin app object which defines the behavior of the Javalin controller.
-     */
 
     private final AccountService accountService;
     private final MessageService messageService;
@@ -62,12 +51,6 @@ public class SocialMediaController {
     private static final String getMessageApiPath() {
         return MESSAGE_API_PATH;
     }
-
-    /**
-     * This is an example handler for an example endpoint.
-     *
-     * @param context The Javalin Context object manages information about both the HTTP request and response.
-     */
 
     // Deserializes the request body to an Account object and registers the account
     private void registerAccount(Context ctx) throws JsonProcessingException {
