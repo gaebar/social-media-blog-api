@@ -1,5 +1,8 @@
 package DAO;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,15 +20,26 @@ import Util.ConnectionUtil;
 
 public class MessageDao implements Dao<Message> {
 
+    // Create a Logger instance for this class.
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageDao.class);
+
     private static final String TIME_POSTED_EPOCH = "time_posted_epoch";
     private static final String MESSAGE_ID = "message_id";
     private static final String POSTED_BY = "posted_by";
     private static final String MESSAGE_TEXT = "message_text";
 
+    // Helper method to handle SQLException
+    private void handleSQLException(SQLException e, String sql, String errorMessage) {
+        LOGGER.error("SQLException Details: {}", e.getMessage());
+        LOGGER.error("SQL State: {}", e.getSQLState());
+        LOGGER.error("Error Code: {}", e.getErrorCode());
+        LOGGER.error("SQL: {}", sql);
+        throw new DaoException(errorMessage, e);
+    }
+
     // Retrieve a specific message by its ID from the database
     @Override
     public Optional<Message> get(int id) {
-        Message message = null;
         // The SQL string is outside the try block as it doesn't require closure like
         // Connection, PreparedStatement, or ResultSet.
         String sql = "SELECT * FROM message WHERE " + MESSAGE_ID + " = ?";
@@ -40,28 +54,25 @@ public class MessageDao implements Dao<Message> {
                 }
             }
         } catch (SQLException e) {
-            throw new DaoException("Error while retrieving the message", e);
+            handleSQLException(e, sql, "Error while retrieving the message with id: " + id);
         }
-        // If the message is not found an empty Optional is returned
-        return Optional.ofNullable(message);
+        return Optional.empty();
     }
 
     // Retrieves all messages from the database
     @Override
     public List<Message> getAll() {
-        List<Message> messages = new ArrayList<>();
         String sql = "SELECT * FROM message";
         Connection conn = ConnectionUtil.getConnection();
+        List<Message> messages = new ArrayList<>();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     messages.add(mapResultSetToMessage(rs));
                 }
-            } catch (SQLException e) {
-                throw new DaoException("Error while retrieving all messages", e);
             }
         } catch (SQLException e) {
-            throw new DaoException("Error while preparing the statement or getting a connection", e);
+            handleSQLException(e, sql, "Error while retrieving all messages");
         }
         return messages;
     }
@@ -76,8 +87,9 @@ public class MessageDao implements Dao<Message> {
                 return mapResultSetToList(rs);
             }
         } catch (SQLException e) {
-            throw new DaoException("Error while retrieving a message by account ID", e);
+            handleSQLException(e, sql, "Error while retrieving a message by account ID: " + accountId);
         }
+        return new ArrayList<>();
     }
 
     // Insert a new message into the database
@@ -93,7 +105,6 @@ public class MessageDao implements Dao<Message> {
 
             ps.executeUpdate();
 
-            // Retrieve the generated keys (auto-generated ID)
             try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     int generatedId = generatedKeys.getInt(1);
@@ -104,8 +115,9 @@ public class MessageDao implements Dao<Message> {
                 }
             }
         } catch (SQLException e) {
-            throw new DaoException("Error while inserting a message", e);
+            handleSQLException(e, sql, "Error while inserting a message");
         }
+        return null;
     }
 
     // Update an existing message in the database
@@ -122,7 +134,7 @@ public class MessageDao implements Dao<Message> {
             ps.setInt(4, message.getMessage_id());
             rowsUpdated = ps.executeUpdate();
         } catch (SQLException e) {
-            throw new DaoException("Error while updating the message", e);
+            handleSQLException(e, sql, "Error while updating the message with id: " + message.getMessage_id());
         }
         return rowsUpdated > 0;
     }
@@ -137,7 +149,7 @@ public class MessageDao implements Dao<Message> {
             ps.setInt(1, message.getMessage_id());
             rowsUpdated = ps.executeUpdate();
         } catch (SQLException e) {
-            throw new DaoException("Error while deleting the message", e);
+            handleSQLException(e, sql, "Error while deleting the message with id: " + message.getMessage_id());
         }
         return rowsUpdated > 0;
     }
