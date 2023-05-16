@@ -19,6 +19,7 @@ import io.javalin.http.NotFoundResponse;
 public class MessageService {
     private MessageDao messageDao;
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageService.class);
+    private static final String DB_ACCESS_ERROR_MSG = "Error accessing the database";
 
     // Default constructor initializing the MessageDao object
     public MessageService() {
@@ -42,7 +43,7 @@ public class MessageService {
             LOGGER.info("Fetched message: {}", message.orElse(null));
             return message;
         } catch (SQLException e) {
-            throw new ServiceException("Error accessing the database", e);
+            throw new ServiceException(DB_ACCESS_ERROR_MSG, e);
         }
     }
 
@@ -54,7 +55,7 @@ public class MessageService {
             LOGGER.info("Fetched {} messages", messages.size());
             return messages;
         } catch (SQLException e) {
-            throw new ServiceException("Error accessing the database", e);
+            throw new ServiceException(DB_ACCESS_ERROR_MSG, e);
         }
     }
 
@@ -66,7 +67,7 @@ public class MessageService {
             LOGGER.info("Fetched {} messages", messages.size());
             return messages;
         } catch (SQLException e) {
-            throw new ServiceException("Error accessing the database", e);
+            throw new ServiceException(DB_ACCESS_ERROR_MSG, e);
         }
     }
 
@@ -97,7 +98,7 @@ public class MessageService {
             LOGGER.info("Created message: {}", createdMessage);
             return createdMessage;
         } catch (SQLException e) {
-            throw new ServiceException("Error accessing the database", e);
+            throw new ServiceException(DB_ACCESS_ERROR_MSG, e);
         }
     }
 
@@ -127,7 +128,7 @@ public class MessageService {
             LOGGER.info("Updated message: {}", message);
             return retrievedMessage.get();
         } catch (SQLException e) {
-            throw new ServiceException("Error accessing the database", e);
+            throw new ServiceException(DB_ACCESS_ERROR_MSG, e);
         }
     }
 
@@ -148,7 +149,7 @@ public class MessageService {
                 throw new NotFoundResponse("Message to delete not found", null);
             }
         } catch (SQLException e) {
-            throw new ServiceException("Error accessing the database", e);
+            throw new ServiceException(DB_ACCESS_ERROR_MSG, e);
         }
     }
 
