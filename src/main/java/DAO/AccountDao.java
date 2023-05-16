@@ -3,12 +3,17 @@ package DAO;
 import Model.Account;
 import Util.ConnectionUtil;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
 // Created a DAO classes for each table in the SocialMedia.sql database (Account, Message).
 // This class implements the CRUD (Create, Retrieve, Update, Delete) operations for the Account table in the database.
 // Each method creates a PreparedStatement object using the try-with-resources, which helps prevent
