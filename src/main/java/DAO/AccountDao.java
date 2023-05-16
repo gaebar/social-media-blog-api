@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-// Create a DAO classes for each table in the SocialMedia.sql database (Account, Message).
+// Created a DAO classes for each table in the SocialMedia.sql database (Account, Message).
 // This class implements the CRUD (Create, Retrieve, Update, Delete) operations for the Account table in the database.
 // Each method creates a PreparedStatement object using the try-with-resources, which helps prevent
 // resource leaks.
@@ -34,11 +34,19 @@ public class AccountDao implements Dao<Account> {
         // The try-with-resources statement is used for 'Connection',
         // 'PreparedStatement', and 'ResultSet' objects.
         // This ensure that each resource will be properly closed even if an exception
-        // is thrown,
-        // thereby helping to prevent resource leaks in the application.
+        // is thrown, thereby helping to prevent resource leaks in the application.
 
-        // The SQL string is outside the try block as it doesn't require closure like
-        // Connection, PreparedStatement, or ResultSet.
+        // I didn't include the Connection inside the try-with-resources block to avoid
+        // conflicts with the written tests.
+
+        // The SQL string is outside the try-with-resources block as it doesn't require
+        // closure like PreparedStatement, or ResultSet.
+
+        // NOTE: ON our case, the finally block should not close the Connection object
+        // because it is
+        // used outside the try block in the try-with-resources statement. Closing the
+        // Connection inside the finally block would lead to an SQLException when the
+        // try-with-resources block tries to close the already closed Connection.
         String sql = "SELECT * FROM account WHERE account_id = ?";
         Connection conn = ConnectionUtil.getConnection();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
