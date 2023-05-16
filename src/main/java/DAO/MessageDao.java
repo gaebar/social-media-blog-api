@@ -19,7 +19,7 @@ public class MessageDao implements Dao<Message> {
 
     // Retrieve a specific message by its ID from the database
     @Override
-    public Optional<Message> get(int id) throws SQLException {
+    public Optional<Message> get(int id) {
         Message message = null;
         // The SQL string is outside the try block as it doesn't require closure like
         // Connection, PreparedStatement, or ResultSet.
@@ -36,7 +36,7 @@ public class MessageDao implements Dao<Message> {
                 }
             }
         } catch (SQLException e) {
-            throw new SQLException("Error while retrieving the message", e);
+            throw new DaoException("Error while retrieving the message", e);
         }
         // If the message is not found an empty Optional is returned
         return Optional.ofNullable(message);
@@ -44,7 +44,7 @@ public class MessageDao implements Dao<Message> {
 
     // Retrieves all messages from the database
     @Override
-    public List<Message> getAll() throws SQLException {
+    public List<Message> getAll() {
         List<Message> messages = new ArrayList<>();
         String sql = "SELECT * FROM message";
         Connection conn = ConnectionUtil.getConnection();
@@ -56,13 +56,13 @@ public class MessageDao implements Dao<Message> {
                 }
             }
         } catch (SQLException e) {
-            throw new SQLException("Error while retrieving all messages", e);
+            throw new DaoException("Error while retrieving all messages", e);
         }
         return messages;
     }
 
     // Retrieves all messages posted by a specific account from the database
-    public List<Message> getMessagesByAccountId(int accountId) throws SQLException {
+    public List<Message> getMessagesByAccountId(int accountId) {
         List<Message> messages = new ArrayList<>();
         String sql = "SELECT * FROM message WHERE posted_by =?";
         Connection conn = ConnectionUtil.getConnection();
@@ -75,14 +75,14 @@ public class MessageDao implements Dao<Message> {
                 }
             }
         } catch (SQLException e) {
-            throw new SQLException("Error while retrieving a message", e);
+            throw new DaoException("Error while retrieving a message", e);
         }
         return messages;
     }
 
     // Insert a new message into the database
     @Override
-    public Message insert(Message message) throws SQLException {
+    public Message insert(Message message) {
         String sql = "INSERT INTO message(posted_by, message_text, time_posted_epoch) VALUES (?, ?, ?)";
         Connection conn = ConnectionUtil.getConnection();
         try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -101,14 +101,14 @@ public class MessageDao implements Dao<Message> {
                 }
             }
         } catch (SQLException e) {
-            throw new SQLException("Error while inserting a message", e);
+            throw new DaoException("Error while inserting a message", e);
         }
         return null;
     }
 
     // Update an existing message in the database
     @Override
-    public boolean update(Message message) throws SQLException {
+    public boolean update(Message message) {
         String sql = "UPDATE message SET posted_by = ?, message_text = ?, time_posted_epoch = ? WHERE message_id =?";
         int rowsUpdated = 0;
         Connection conn = ConnectionUtil.getConnection();
@@ -119,14 +119,14 @@ public class MessageDao implements Dao<Message> {
             ps.setInt(4, message.getMessage_id());
             rowsUpdated = ps.executeUpdate();
         } catch (SQLException e) {
-            throw new SQLException("Error while updating the message", e);
+            throw new DaoException("Error while updating the message", e);
         }
         return rowsUpdated > 0;
     }
 
     // Delete a message from the database
     @Override
-    public boolean delete(Message message) throws SQLException {
+    public boolean delete(Message message) {
         String sql = "DELETE FROM message WHERE message_id = ?";
         int rowsUpdated = 0;
         Connection conn = ConnectionUtil.getConnection();
@@ -134,7 +134,7 @@ public class MessageDao implements Dao<Message> {
             ps.setInt(1, message.getMessage_id());
             rowsUpdated = ps.executeUpdate();
         } catch (SQLException e) {
-            throw new SQLException("Error while deleting the message", e);
+            throw new DaoException("Error while deleting the message", e);
         }
         return rowsUpdated > 0;
     }
