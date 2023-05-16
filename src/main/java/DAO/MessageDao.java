@@ -99,12 +99,13 @@ public class MessageDao implements Dao<Message> {
                     int generatedId = generatedKeys.getInt(1);
                     return new Message(generatedId, message.getPosted_by(), message.getMessage_text(),
                             message.getTime_posted_epoch());
+                } else {
+                    throw new DaoException("Failed to insert message, no ID obtained.");
                 }
             }
         } catch (SQLException e) {
             throw new DaoException("Error while inserting a message", e);
         }
-        return null;
     }
 
     // Update an existing message in the database
