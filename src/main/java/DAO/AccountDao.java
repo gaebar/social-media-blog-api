@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
 // Created a DAO classes for each table in the SocialMedia.sql database (Account, Message).
 // This class implements the CRUD (Create, Retrieve, Update, Delete) operations for the Account table in the database.
 // Each method creates a PreparedStatement object using the try-with-resources, which helps prevent
@@ -24,29 +23,40 @@ public class AccountDao implements Dao<Account> {
      * NullPointerExceptions, the method return an Optional <Account>.
      *
      * This Allows us to clearly communicate that an account might be absent and
-     * forces the calling code to handle
-     * this case explicitly.
+     * forces the calling code to handle this case explicitly.
+     */
+
+    /*
+     * The try-with-resources statement is used for 'PreparedStatement',
+     * and 'ResultSet' objects. This ensures that each resource will be properly
+     * closed even if an exception is thrown, thereby helping to prevent resource
+     * leaks in the application.
+     *
+     * The 'Connection' object isn't included in the try-with-resources block.
+     * This is because we're using a singleton connection pattern via the
+     * ConnectionUtil.getConnection() method.
+     * Including the 'Connection' object in the try-with-resources block would
+     * automatically close the connection when the block is exited,
+     * which would conflict with the singleton pattern (i.e., the same connection
+     * might still be needed elsewhere in the application).
+     *
+     * It's important to note that in our particular setup, we're using an H2
+     * in-memory database, which means the database will be cleared when the
+     * application ends.
+     * So, while we aren't explicitly closing the connection, this isn't a
+     * problem for our specific use-case.
+     * In a production environment or with different database setups, careful
+     * management
+     * of database connections would be crucial to prevent resource leaks.
+     *
+     * The SQL string is outside the try-with-resources block because it doesn't
+     * need to be closed like the PreparedStatement or ResultSet.
      */
 
     // Retrieve an account by its ID from the database
     @Override
     public Optional<Account> get(int id) throws SQLException {
-        // The try-with-resources statement is used for 'Connection',
-        // 'PreparedStatement', and 'ResultSet' objects.
-        // This ensure that each resource will be properly closed even if an exception
-        // is thrown, thereby helping to prevent resource leaks in the application.
 
-        // I didn't include the Connection inside the try-with-resources block to avoid
-        // conflicts with the written tests.
-
-        // The SQL string is outside the try-with-resources block as it doesn't require
-        // closure like PreparedStatement, or ResultSet.
-
-        // NOTE: ON our case, the finally block should not close the Connection object
-        // because it is
-        // used outside the try block in the try-with-resources statement. Closing the
-        // Connection inside the finally block would lead to an SQLException when the
-        // try-with-resources block tries to close the already closed Connection.
         String sql = "SELECT * FROM account WHERE account_id = ?";
         Connection conn = ConnectionUtil.getConnection();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
