@@ -137,9 +137,6 @@ public class MessageService {
     // their own messages.
     public void deleteMessage(Message message) {
         LOGGER.info("Deleting message: {}", message);
-        if (message == null) {
-            throw new ServiceException("Message and account cannot be null");
-        }
         // checkAccountPermission(message.getPosted_by());
         try {
             boolean hasDeletedMessage = messageDao.delete(message);
