@@ -82,11 +82,6 @@ public class MessageService {
             throw new ServiceException("Account must exist when posting a new message");
         }
 
-        // Validate the message text length
-        if (message.getMessage_text().length() > 254) {
-            throw new ServiceException("Message cannot be over 254 characters");
-        }
-
         // Validate the message
         validateMessage(message);
 
@@ -158,7 +153,7 @@ public class MessageService {
             throw new ServiceException("Message text cannot be null or empty");
         }
         if (message.getMessage_text().length() > 254) {
-            throw new ServiceException("Message text cannot exceed 255 characters");
+            throw new ServiceException("Message text cannot exceed 254 characters");
         }
     }
 

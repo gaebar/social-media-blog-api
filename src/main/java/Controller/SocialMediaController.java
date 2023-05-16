@@ -15,20 +15,16 @@ import io.javalin.Javalin;
 import io.javalin.http.Context;
 
 /**
- * TODO: You will need to write your own endpoints and handlers for your
- * controller. The endpoints you will need can be
- * found in readme.md as well as the test cases. You should
- * refer to prior mini-project labs and lecture materials for guidance on how a
- * controller may be built.
+ * TODO: You will need to write your own endpoints and handlers for your controller. The endpoints you will need can be
+ * found in readme.md as well as the test cases. You should refer to prior mini-project labs and lecture materials for
+ * guidance on how a controller may be built.
  */
 public class SocialMediaController {
     /**
-     * In order for the test cases to work, you will need to write the endpoints in
-     * the startAPI() method, as the test
-     * suite must receive a Javalin object from this method.
+     * In order for the test cases to work, you will need to write the endpoints in the startAPI() method, as the test suite
+     * must receive a Javalin object from this method.
      *
-     * @return a Javalin app object which defines the behavior of the Javalin
-     *         controller.
+     * @return a Javalin app object which defines the behavior of the Javalin controller.
      */
 
     private final AccountService accountService;
@@ -49,7 +45,8 @@ public class SocialMediaController {
         app.get(getMessageApiPath(), this::getMessageById);
         app.delete(getMessageApiPath(), this::deleteMessageById);
         app.patch(getMessageApiPath(), this::updateMessageById);
-        app.get("/accounts/{account_id}/messages", this::getMessagesByAccountId);
+        app.get("/accounts/{account_id}/messages",
+                this::getMessagesByAccountId);
 
         return app;
 
@@ -62,15 +59,14 @@ public class SocialMediaController {
     // definitions,
     // we ensure that the API path is consistent across the codebase and can be
     // easily modified if required.
-    private String getMessageApiPath() {
+    private static final String getMessageApiPath() {
         return MESSAGE_API_PATH;
     }
 
     /**
      * This is an example handler for an example endpoint.
      *
-     * @param context The Javalin Context object manages information about both the
-     *                HTTP request and response.
+     * @param context The Javalin Context object manages information about both the HTTP request and response.
      */
 
     // Deserializes the request body to an Account object and registers the account
@@ -91,11 +87,13 @@ public class SocialMediaController {
         ObjectMapper mapper = new ObjectMapper(); // it calls a default no-arg constructor from Model.Account - REQUIRED
                                                   // for Jackson ObjectMapper
         Account account = mapper.readValue(ctx.body(), Account.class);
-        Optional<Account> loggedInAccount = accountService.validateLogin(account);
+        Optional<Account> loggedInAccount = accountService
+                .validateLogin(account);
         try {
             if (loggedInAccount.isPresent()) {
                 ctx.json(mapper.writeValueAsString(loggedInAccount));
-                ctx.sessionAttribute("logged_in_account", loggedInAccount.get());
+                ctx.sessionAttribute("logged_in_account",
+                        loggedInAccount.get());
                 ctx.json(loggedInAccount.get());
             } else {
                 ctx.status(401);
@@ -111,8 +109,10 @@ public class SocialMediaController {
         ObjectMapper mapper = new ObjectMapper();
         Message mappedMessage = mapper.readValue(ctx.body(), Message.class);
         try {
-            Optional<Account> account = accountService.getAccountById(mappedMessage.getPosted_by());
-            Message message = messageService.createMessage(mappedMessage, account);
+            Optional<Account> account = accountService
+                    .getAccountById(mappedMessage.getPosted_by());
+            Message message = messageService.createMessage(mappedMessage,
+                    account);
             ctx.json(message);
         } catch (ServiceException e) {
             ctx.status(400);
@@ -145,7 +145,7 @@ public class SocialMediaController {
     }
 
     // Deletes a specific message by its ID from the message service
-    private void deleteMessageById(Context ctx) throws JsonProcessingException {
+    private void deleteMessageById(Context ctx) {
         try {
             int id = Integer.parseInt(ctx.pathParam("message_id"));
             Optional<Message> message = messageService.getMessageById(id);
@@ -170,15 +170,9 @@ public class SocialMediaController {
             int id = Integer.parseInt(ctx.pathParam("message_id"));
             mappedMessage.setMessage_id(id);
 
-            // Message message = ctx.bodyAsClass(Message.class);
-            // message.setMessage_id(id);
-            // Account account = ctx.sessionAttribute("logged_in_account");
-            // if (account != null) {
-            Message messageUpdated = messageService.updateMessage(mappedMessage);
+            Message messageUpdated = messageService
+                    .updateMessage(mappedMessage);
             ctx.json(messageUpdated);
-            // } else {
-            // ctx.status(400);
-            // }
 
         } catch (ServiceException e) {
             ctx.status(400);
@@ -187,10 +181,12 @@ public class SocialMediaController {
 
     // Retrieve all messages associated with a specific account ID and sends them as
     // a response
-    private void getMessagesByAccountId(Context ctx) throws JsonProcessingException {
+    private void getMessagesByAccountId(Context ctx)
+            throws JsonProcessingException {
         try {
             int accountId = Integer.parseInt(ctx.pathParam("account_id"));
-            List<Message> messages = messageService.getMessagesByAccountId(accountId);
+            List<Message> messages = messageService
+                    .getMessagesByAccountId(accountId);
             if (!messages.isEmpty()) {
                 ctx.json(messages);
             } else { // if no messages
