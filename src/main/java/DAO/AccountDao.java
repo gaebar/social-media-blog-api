@@ -41,8 +41,7 @@ public class AccountDao implements Dao<Account> {
         // Connection, PreparedStatement, or ResultSet.
         String sql = "SELECT * FROM account WHERE account_id = ?";
         Connection conn = ConnectionUtil.getConnection();
-        try {
-            PreparedStatement ps = conn.prepareStatement(sql);
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             // ResultSet is in a separate try block to ensure it gets closed after use,
             // even if an exception is thrown during data processing.
@@ -66,8 +65,7 @@ public class AccountDao implements Dao<Account> {
         List<Account> accounts = new ArrayList<>();
         String sql = "SELECT * FROM account";
         Connection conn = ConnectionUtil.getConnection();
-        try {
-            PreparedStatement ps = conn.prepareStatement(sql);
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Account account = new Account(
@@ -89,8 +87,7 @@ public class AccountDao implements Dao<Account> {
         String sql = "SELECT * FROM account WHERE username = ?";
         Connection conn = ConnectionUtil.getConnection();
 
-        try {
-            PreparedStatement ps = conn.prepareStatement(sql);
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, username);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -112,8 +109,7 @@ public class AccountDao implements Dao<Account> {
         String sql = "SELECT * FROM account WHERE username = ?";
         Connection conn = ConnectionUtil.getConnection();
 
-        try {
-            PreparedStatement ps = conn.prepareStatement(sql);
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, username);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -139,8 +135,7 @@ public class AccountDao implements Dao<Account> {
     public boolean doesUsernameExist(String username) throws SQLException {
         String sql = "SELECT COUNT(*) FROM Account WHERE username = ?";
         Connection conn = ConnectionUtil.getConnection();
-        try {
-            PreparedStatement ps = conn.prepareStatement(sql);
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, username);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -160,8 +155,7 @@ public class AccountDao implements Dao<Account> {
     public Account insert(Account account) throws SQLException {
         String sql = "INSERT INTO account (username, password) VALUES(?, ?)";
         Connection conn = ConnectionUtil.getConnection();
-        try {
-            PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, account.getUsername());
             ps.setString(2, account.getPassword());
             ps.executeUpdate();
@@ -169,8 +163,8 @@ public class AccountDao implements Dao<Account> {
             // Retrieve the generated keys (auto-generated ID)
             try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    int generated_account_id = (int) generatedKeys.getInt(1);
-                    return new Account(generated_account_id, account.getUsername(), account.getPassword());
+                    int generatedAccountId = (int) generatedKeys.getInt(1);
+                    return new Account(generatedAccountId, account.getUsername(), account.getPassword());
                 } else {
                     throw new SQLException("Creating account failed, no ID obtained.");
                 }
@@ -185,8 +179,7 @@ public class AccountDao implements Dao<Account> {
     public boolean update(Account account) throws SQLException {
         String sql = "UPDATE account SET username = ?, password = ? WHERE account_id = ?";
         Connection conn = ConnectionUtil.getConnection();
-        try {
-            PreparedStatement ps = conn.prepareStatement(sql);
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, account.getUsername());
             ps.setString(2, account.getPassword());
             ps.setInt(3, account.getAccount_id());
@@ -206,8 +199,7 @@ public class AccountDao implements Dao<Account> {
     public boolean delete(Account account) throws SQLException {
         String sql = "DELETE FROM account WHERE account_id = ?";
         Connection conn = ConnectionUtil.getConnection();
-        try {
-            PreparedStatement ps = conn.prepareStatement(sql);
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, account.getAccount_id());
             int affectedRows = ps.executeUpdate();
             return affectedRows > 0;
