@@ -18,9 +18,8 @@ public class SocialMediaController {
 
     private final AccountService accountService;
     private final MessageService messageService;
-    private static final String MESSAGE_API_PATH = "/messages/{message_id}";
-
     private static final String MESSAGE_ID_PARAM = "message_id";
+    private static final String MESSAGE_API_PATH = "/messages/{" + MESSAGE_ID_PARAM + "}";
 
     public SocialMediaController() {
         this.accountService = new AccountService();
