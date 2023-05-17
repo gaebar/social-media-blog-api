@@ -172,7 +172,7 @@ public class AccountDao implements Dao<Account> {
 
     // Check if a username already exists in the database
     public boolean doesUsernameExist(String username) {
-        String sql = "SELECT COUNT(*) FROM Account WHERE " + USERNAME + " = ?";
+        String sql = "SELECT COUNT(*) FROM account WHERE " + USERNAME + " = ?";
         Connection conn = ConnectionUtil.getConnection();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, username);

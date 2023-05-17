@@ -1,30 +1,40 @@
 package DAO;
 
-// The DaoException class is a custom exception that is thrown when an error occurs in the DAO layer.
-// By creating this custom exception, we can encapsulate and handle specific errors that may occur
-// in the DAO layer separately from other types of exceptions.
-
-// Extending RuntimeException allows DaoException to be an unchecked exception, meaning it
-// does not need to be declared in method signatures or explicitly caught in code.
+/**
+ * DaoException is a custom unchecked exception class that encapsulates and
+ * handles exceptions that may occur within the DAO layer.
+ * Extending RuntimeException allows DaoException to be an unchecked exception,
+ * which does not have to be declared in method signatures
+ * or explicitly caught in the code.
+ */
 public class DaoException extends RuntimeException {
 
-    // The serialVersionUID is a version identifier for the Serializable class. It
-    // is used during the deserialization process to verify that the sender and
-    // receiver of a serialized object have loaded classes for that object that are
-    // compatible with respect to serialization. If the serialVersionUID values of
-    // the sender and receiver classes are different, deserialization will result in
-    // an InvalidClassException.
+    /**
+     * A version identifier for Serializable classes. This is used during
+     * deserialization to verify that the sender and
+     * receiver of a serialized object have compatible versions of the class.
+     * If the serialVersionUID of the sender and receiver classes do not match,
+     * deserialization will result in an InvalidClassException.
+     */
     private static final long serialVersionUID = 1L;
 
     // Constructs a new DaoException with the specified error message.
-    // @param message the error message
+    // @param message The detailed message for the exception. This is saved for
+    // later retrieval by the getMessage() method.
     public DaoException(String message) {
         super(message);
     }
 
     // Constructs a new DaoException with the specified error message and cause.
-    // @param message the error message
-    // @param cause the cause of the exception
+    // Note that the detail message associated with cause is not automatically
+    // incorporated into this exception's detail message.
+
+    // @param message The detailed message for the exception. This is saved for
+    // later retrieval by the getMessage() method.
+    // @param cause The cause of the exception (which is saved for later retrieval
+    // by the getCause() method).
+    // A null value is permitted, and indicates that the cause is nonexistent or
+    // unknown.
     public DaoException(String message, Throwable cause) {
         super(message, cause);
     }
