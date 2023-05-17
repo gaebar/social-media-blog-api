@@ -18,8 +18,6 @@ public class SocialMediaController {
 
     private final AccountService accountService;
     private final MessageService messageService;
-    private static final String MESSAGE_ID_PARAM = "message_id";
-    private static final String MESSAGE_API_PATH = "/messages/{" + MESSAGE_ID_PARAM + "}";
 
     public SocialMediaController() {
         this.accountService = new AccountService();
@@ -32,25 +30,14 @@ public class SocialMediaController {
         app.post("/login", this::loginAccount);
         app.post("/messages", this::createMessage);
         app.get("/messages", this::getAllMessages);
-        app.get(getMessageApiPath(), this::getMessageById);
-        app.delete(getMessageApiPath(), this::deleteMessageById);
-        app.patch(getMessageApiPath(), this::updateMessageById);
+        app.get("/messages/{message_id}", this::getMessageById);
+        app.delete("/messages/{message_id}", this::deleteMessageById);
+        app.patch("/messages/{message_id}", this::updateMessageById);
         app.get("/accounts/{account_id}/messages",
                 this::getMessagesByAccountId);
 
         return app;
 
-    }
-
-    // Followed the SonarLint suggestions to customized getMessageApiPath() method,
-    // which returns the MESSAGE_API_PATH variable value. By using the
-    // getMessageApiPath() method
-    // instead of directly referencing the MESSAGE_API_PATH variable in the endpoint
-    // definitions,
-    // we ensure that the API path is consistent across the codebase and can be
-    // easily modified if required.
-    private static String getMessageApiPath() {
-        return MESSAGE_API_PATH;
     }
 
     // Deserializes the request body to an Account object and registers the account
@@ -115,7 +102,7 @@ public class SocialMediaController {
     // as a response
     private void getMessageById(Context ctx) {
         try {
-            int id = Integer.parseInt(ctx.pathParam(MESSAGE_ID_PARAM));
+            int id = Integer.parseInt(ctx.pathParam("message_id"));
             Optional<Message> message = messageService.getMessageById(id);
             if (message.isPresent()) {
                 ctx.json(message.get());
@@ -132,7 +119,7 @@ public class SocialMediaController {
     // Deletes a specific message by its ID from the message service
     private void deleteMessageById(Context ctx) {
         try {
-            int id = Integer.parseInt(ctx.pathParam(MESSAGE_ID_PARAM));
+            int id = Integer.parseInt(ctx.pathParam("message_id"));
             Optional<Message> message = messageService.getMessageById(id);
             if (message.isPresent()) {
                 messageService.deleteMessage(message.get());
@@ -151,7 +138,7 @@ public class SocialMediaController {
         ObjectMapper mapper = new ObjectMapper();
         Message mappedMessage = mapper.readValue(ctx.body(), Message.class);
         try {
-            int id = Integer.parseInt(ctx.pathParam(MESSAGE_ID_PARAM));
+            int id = Integer.parseInt(ctx.pathParam("message_id"));
             mappedMessage.setMessage_id(id);
 
             Message messageUpdated = messageService
