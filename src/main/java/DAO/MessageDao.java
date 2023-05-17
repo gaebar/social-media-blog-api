@@ -23,11 +23,6 @@ public class MessageDao implements Dao<Message> {
     // Create a Logger instance for this class.
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageDao.class);
 
-    private static final String TIME_POSTED_EPOCH = "time_posted_epoch";
-    private static final String MESSAGE_ID = "message_id";
-    private static final String POSTED_BY = "posted_by";
-    private static final String MESSAGE_TEXT = "message_text";
-
     // Helper method to handle SQLException
     private void handleSQLException(SQLException e, String sql, String errorMessage) {
         LOGGER.error("SQLException Details: {}", e.getMessage());
@@ -42,7 +37,7 @@ public class MessageDao implements Dao<Message> {
     public Optional<Message> getById(int id) {
         // The SQL string is outside the try block as it doesn't require closure like
         // Connection, PreparedStatement, or ResultSet.
-        String sql = "SELECT * FROM message WHERE " + MESSAGE_ID + " = ?";
+        String sql = "SELECT * FROM message WHERE message_id = ?";
         Connection conn = ConnectionUtil.getConnection();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -79,7 +74,7 @@ public class MessageDao implements Dao<Message> {
 
     // Retrieves all messages posted by a specific account from the database
     public List<Message> getMessagesByAccountId(int accountId) {
-        String sql = "SELECT * FROM message WHERE " + POSTED_BY + " = ?";
+        String sql = "SELECT * FROM message WHERE posted_by = ?";
         Connection conn = ConnectionUtil.getConnection();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, accountId);
@@ -95,8 +90,7 @@ public class MessageDao implements Dao<Message> {
     // Insert a new message into the database
     @Override
     public Message insert(Message message) {
-        String sql = "INSERT INTO message(" + POSTED_BY + ", " + MESSAGE_TEXT + ", " + TIME_POSTED_EPOCH
-                + ") VALUES (?, ?, ?)";
+        String sql = "INSERT INTO message(posted_by, message_text, time_posted_epoch) VALUES (?, ?, ?)";
         Connection conn = ConnectionUtil.getConnection();
 
         // The PreparedStatement is created with the Statement.RETURN_GENERATED_KEYS
@@ -150,8 +144,7 @@ public class MessageDao implements Dao<Message> {
     // Update an existing message in the database
     @Override
     public boolean update(Message message) {
-        String sql = "UPDATE message SET " + POSTED_BY + " = ?, " + MESSAGE_TEXT + " = ?, "
-                + TIME_POSTED_EPOCH + " = ? WHERE " + MESSAGE_ID + " = ?";
+        String sql = "UPDATE message SET posted_by = ?, message_text = ?, time_posted_epoch = ? WHERE message_id = ?";
         int rowsUpdated = 0;
         Connection conn = ConnectionUtil.getConnection();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -169,7 +162,7 @@ public class MessageDao implements Dao<Message> {
     // Delete a message from the database
     @Override
     public boolean delete(Message message) {
-        String sql = "DELETE FROM message WHERE " + MESSAGE_ID + " = ?";
+        String sql = "DELETE FROM message WHERE message_id = ?";
         int rowsUpdated = 0;
         Connection conn = ConnectionUtil.getConnection();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -182,11 +175,12 @@ public class MessageDao implements Dao<Message> {
     }
 
     // Helper method to map ResultSet to Message object
+
     private Message mapResultSetToMessage(ResultSet rs) throws SQLException {
-        int messageId = rs.getInt(MESSAGE_ID);
-        int postedBy = rs.getInt(POSTED_BY);
-        String messageText = rs.getString(MESSAGE_TEXT);
-        long timePostedEpoch = rs.getLong(TIME_POSTED_EPOCH);
+        int messageId = rs.getInt("message_id");
+        int postedBy = rs.getInt("posted_by");
+        String messageText = rs.getString("message_text");
+        long timePostedEpoch = rs.getLong("time_posted_epoch");
         return new Message(messageId, postedBy, messageText, timePostedEpoch);
     }
 
