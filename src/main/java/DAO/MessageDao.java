@@ -106,8 +106,11 @@ public class MessageDao implements Dao<Message> {
             ps.executeUpdate();
 
             try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                // Check if any keys were generated
                 if (generatedKeys.next()) {
+                    // Retrieve the generated ID
                     int generatedId = generatedKeys.getInt(1);
+                    // Create a new Message object with the generated ID and other attributes
                     return new Message(generatedId, message.getPosted_by(), message.getMessage_text(),
                             message.getTime_posted_epoch());
                 } else {
@@ -117,7 +120,7 @@ public class MessageDao implements Dao<Message> {
         } catch (SQLException e) {
             handleSQLException(e, sql, "Error while inserting a message");
         }
-        return null;
+        throw new DaoException("Failed to insert message");
     }
 
     // Update an existing message in the database

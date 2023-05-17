@@ -137,7 +137,7 @@ public class MessageService {
             if (hasDeletedMessage) {
                 LOGGER.info("Deleted message {}", message);
             } else {
-                throw new NotFoundResponse("Message to delete not found", null);
+                throw new NotFoundResponse("Message to delete not found");
             }
         } catch (DaoException e) {
             throw new ServiceException(DB_ACCESS_ERROR_MSG, e);
