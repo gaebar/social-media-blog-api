@@ -10,11 +10,15 @@ package DAO;
 public class DaoException extends RuntimeException {
 
     /**
-     * A version identifier for Serializable classes. This is used during
-     * deserialization to verify that the sender and
-     * receiver of a serialized object have compatible versions of the class.
-     * If the serialVersionUID of the sender and receiver classes do not match,
-     * deserialization will result in an InvalidClassException.
+     * Serialization in Java is the process of converting an object into a byte stream 
+     * which can be saved to memory, a database, or a file, or can be transmitted over the network. 
+     * Its primary purpose is to preserve the state of an object for later use. 
+     * The reverse process of converting the byte stream back into its original object is called deserialization.
+     *
+     * serialVersionUID is a version control identifier used in serialization and deserialization.
+     * It's essential for ensuring that the sender and receiver of a serialized object 
+     * maintain a compatible version of the class. Incompatibility in this version ID 
+     * between the sender and receiver will lead to an InvalidClassException during deserialization.
      */
     private static final long serialVersionUID = 1L;
 

@@ -16,6 +16,12 @@ public class ServiceException extends RuntimeException {
         super(message);
     }
 
+    // Constructor that only takes the original exception that causes this exception
+    // @param cause the cause of the exception
+    public ServiceException(Throwable cause) {
+        super(cause);
+    }
+
     // Constructor that takes in a custom message and the original exception that
     // causes this exception
     // @param message the error message
