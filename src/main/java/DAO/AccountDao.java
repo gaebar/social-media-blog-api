@@ -25,10 +25,6 @@ public class AccountDao implements Dao<Account> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AccountDao.class);
 
-    // private static final String ACCOUNT_ID = "account_id";
-    // private static final String USERNAME = "username";
-    // private static final String PASSWORD = "password";
-
     // Helper method to handle SQLException
     private void handleSQLException(SQLException e, String sql, String errorMessage) {
         LOGGER.error("SQLException Details: {}", e.getMessage());
