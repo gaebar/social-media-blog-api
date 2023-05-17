@@ -14,7 +14,7 @@ public interface Dao<T> {
     // database.
     // If the object is found, it is wrapped in an Optional,
     // if not, an empty Optional is returned.
-    Optional<T> get(int id);
+    Optional<T> getById(int id);
 
     // Retrieve all objects in the system. A List is used here because there can be
     // multiple records in the database for type T, and we want to retrieve all of

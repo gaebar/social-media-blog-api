@@ -36,7 +36,7 @@ public class MessageService {
     public Optional<Message> getMessageById(int id) {
         LOGGER.info("Fetching message with ID: {} ", id);
         try {
-            Optional<Message> message = messageDao.get(id);
+            Optional<Message> message = messageDao.getById(id);
             if (!message.isPresent()) {
                 throw new ServiceException("Message not found");
             }

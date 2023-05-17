@@ -39,7 +39,7 @@ public class AccountService {
     public Optional<Account> getAccountById(int id) {
         LOGGER.info("Fetching account with ID: {}", id);
         try {
-            Optional<Account> account = accountDao.get(id);
+            Optional<Account> account = accountDao.getById(id);
             LOGGER.info("Fetched account: {}", account.orElse(null));
             return account;
         } catch (DaoException e) {
@@ -158,7 +158,7 @@ public class AccountService {
     public boolean accountExists(int accountId) {
         LOGGER.info("Checking account existence with ID: {}", accountId);
         try {
-            Optional<Account> account = accountDao.get(accountId);
+            Optional<Account> account = accountDao.getById(accountId);
             boolean exists = account.isPresent();
             LOGGER.info("Account existence: {}", exists);
             return exists;

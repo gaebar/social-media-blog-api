@@ -39,7 +39,7 @@ public class MessageDao implements Dao<Message> {
 
     // Retrieve a specific message by its ID from the database
     @Override
-    public Optional<Message> get(int id) {
+    public Optional<Message> getById(int id) {
         // The SQL string is outside the try block as it doesn't require closure like
         // Connection, PreparedStatement, or ResultSet.
         String sql = "SELECT * FROM message WHERE " + MESSAGE_ID + " = ?";

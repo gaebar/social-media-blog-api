@@ -76,7 +76,7 @@ public class AccountDao implements Dao<Account> {
 
     // Retrieve an account by its ID from the database
     @Override
-    public Optional<Account> get(int id) {
+    public Optional<Account> getById(int id) {
 
         String sql = "SELECT * FROM account WHERE " + ACCOUNT_ID + " = ?";
         Connection conn = ConnectionUtil.getConnection();
