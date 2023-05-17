@@ -98,6 +98,10 @@ public class MessageDao implements Dao<Message> {
         String sql = "INSERT INTO message(" + POSTED_BY + ", " + MESSAGE_TEXT + ", " + TIME_POSTED_EPOCH
                 + ") VALUES (?, ?, ?)";
         Connection conn = ConnectionUtil.getConnection();
+
+        // The PreparedStatement is created with the Statement.RETURN_GENERATED_KEYS
+        // option. This configuration tells the database driver to return the generated
+        // keys after executing the statement.
         try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, message.getPosted_by());
             ps.setString(2, message.getMessage_text());
@@ -105,11 +109,31 @@ public class MessageDao implements Dao<Message> {
 
             ps.executeUpdate();
 
+            // When we perform an INSERT operation on a table that has an auto-incrementing
+            // primary key column, the database assigns a unique value to that column for
+            // the newly inserted row. The generatedKeys feature enables us to retrieve
+            // that generated key value, which can be useful for further processing or
+            // referencing the inserted data.
+
+            // After executing the INSERT statement using ps.executeUpdate(), the ResultSet
+            // object
+            // named generatedKeys is obtained by calling ps.getGeneratedKeys().
             try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
                 // Check if any keys were generated
                 if (generatedKeys.next()) {
+
+                    // By iterating over the ResultSet using generatedKeys.next(), we can access
+                    // the generated key value(s). In this case, since we expect only one key
+                    // (the ID of the inserted message), we use generatedKeys.getInt(1) to retrieve
+                    // the value of the first column in the result set, which represents the
+                    // generated ID.
+
                     // Retrieve the generated ID
                     int generatedId = generatedKeys.getInt(1);
+
+                    // Finally, the retrieved ID is used to create a new Message object, combining
+                    // it with the other attributes of the inserted message.
+
                     // Create a new Message object with the generated ID and other attributes
                     return new Message(generatedId, message.getPosted_by(), message.getMessage_text(),
                             message.getTime_posted_epoch());
