@@ -21,7 +21,7 @@ import java.util.Optional;
 // Each method creates a PreparedStatement object using the try-with-resources, which helps prevent
 // resource leaks.
 
-public class AccountDao implements Dao<Account> {
+public class AccountDao implements BaseDao<Account> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AccountDao.class);
 

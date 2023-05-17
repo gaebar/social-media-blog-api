@@ -18,7 +18,7 @@ import Util.ConnectionUtil;
 // This class implements the DAO for the Message table in the SocialMedia.sql database.
 // It provides the CRUD (Create, Retrieve, Update, Delete) operations for messages.
 
-public class MessageDao implements Dao<Message> {
+public class MessageDao implements BaseDao<Message> {
 
     // Create a Logger instance for this class.
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageDao.class);

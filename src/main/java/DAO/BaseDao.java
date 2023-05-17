@@ -10,7 +10,7 @@ import java.util.Optional;
  * implementing this interface.
  */
 
-public interface Dao<T> {
+public interface BaseDao<T> {
 
     // Retrieve an object by its id.
     // @param id The id of the object to retrieve.
