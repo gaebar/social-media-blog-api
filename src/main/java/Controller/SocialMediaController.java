@@ -49,7 +49,7 @@ public class SocialMediaController {
     // definitions,
     // we ensure that the API path is consistent across the codebase and can be
     // easily modified if required.
-    private static final String getMessageApiPath() {
+    private static String getMessageApiPath() {
         return MESSAGE_API_PATH;
     }
 
