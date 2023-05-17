@@ -209,7 +209,6 @@ public class AccountDao implements Dao<Account> {
                 }
             }
         } catch (SQLException e) {
-            handleSQLException(e, sql, "Error while inserting account: " + account.toString());
             throw new DaoException("Creating account failed due to SQL error", e);
         }
     }
@@ -230,7 +229,6 @@ public class AccountDao implements Dao<Account> {
                 throw new DaoException("Updating account failed, no such account found.");
             }
         } catch (SQLException e) {
-            handleSQLException(e, sql, "Error while updating the account: " + account.toString());
             throw new DaoException("Updating account failed due to SQL error", e);
         }
     }
@@ -245,7 +243,6 @@ public class AccountDao implements Dao<Account> {
             int affectedRows = ps.executeUpdate();
             return affectedRows > 0;
         } catch (SQLException e) {
-            handleSQLException(e, sql, "Error while deleting the account: " + account.toString());
             throw new DaoException("Deleting account failed due to SQL error", e);
         }
     }
