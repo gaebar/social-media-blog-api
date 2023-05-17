@@ -10,8 +10,19 @@ import java.util.Optional;
  * implementing this interface.
  */
 
+
 public interface BaseDao<T> {
 
+    /*
+    * Option is used in the get method to handle the possibility that an account
+    * may not exists in the database.
+    * Instead of returning null, which can cause problems such as
+    * NullPointerExceptions, the method return an Optional <Account>.
+    *
+    * This Allows us to clearly communicate that an account might be absent and
+    * forces the calling code to handle this case explicitly.
+    */ 
+    
     // Retrieve an object by its id.
     // @param id The id of the object to retrieve.
     // @return The object, if found, wrapped in an Optional; otherwise, an empty

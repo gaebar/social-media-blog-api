@@ -33,15 +33,6 @@ public class AccountDao implements BaseDao<Account> {
         LOGGER.error("SQL: {}", sql);
         throw new DaoException(errorMessage, e);
     }
-    /*
-     * Option is used in the get method to handle the possibility that an account
-     * may not exists in the database.
-     * Instead of returning null, which can cause problems such as
-     * NullPointerExceptions, the method return an Optional <Account>.
-     *
-     * This Allows us to clearly communicate that an account might be absent and
-     * forces the calling code to handle this case explicitly.
-     */
 
     /*
      * The try-with-resources statement is used for 'PreparedStatement',
@@ -117,6 +108,9 @@ public class AccountDao implements BaseDao<Account> {
     }
 
     // Retrieve an account by its username from the database
+    // @param username The username of the account to retrieve.
+    // @return The account, if found, wrapped in an Optional; otherwise, an empty
+    // Optional.
     public Optional<Account> findAccountByUsername(String username) {
 
         String sql = "SELECT * FROM account WHERE username = ?";
@@ -166,7 +160,10 @@ public class AccountDao implements BaseDao<Account> {
         return Optional.empty();
     }
 
-    // Check if a username already exists in the database
+    // Checks if a username already exists in the database. This can be used to prevent
+    // duplicate usernames in the database.
+    // @param username The username to check for existence in the database.
+    // @return true if the username already exists in the database; false if the username does not exist.
     public boolean doesUsernameExist(String username) {
         String sql = "SELECT COUNT(*) FROM account WHERE username = ?";
         Connection conn = ConnectionUtil.getConnection();
