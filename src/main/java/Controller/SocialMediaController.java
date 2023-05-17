@@ -16,10 +16,12 @@ import io.javalin.http.Context;
 
 public class SocialMediaController {
 
+    // Instances for handling account-related and message-related operations
     private final AccountService accountService;
     private final MessageService messageService;
 
     public SocialMediaController() {
+        // Initialize the accountService and messageService instances
         this.accountService = new AccountService();
         this.messageService = new MessageService();
     }
