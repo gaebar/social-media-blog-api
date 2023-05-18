@@ -61,7 +61,13 @@ public class AccountDao implements BaseDao<Account> {
      * need to be closed like the PreparedStatement or ResultSet.
      */
 
-    // Retrieve an account by its ID from the database
+    /**
+     * Retrieves an account from the database based on its ID.
+     *
+     * @param id The ID of the account.
+     * @return An Optional object, which will contain the account if it was found,
+     *         otherwise it will be empty.
+     */
     @Override
     public Optional<Account> getById(int id) {
 
@@ -85,7 +91,12 @@ public class AccountDao implements BaseDao<Account> {
         return Optional.empty();
     }
 
-    // Retrieve all accounts from the database
+    /**
+     * Retrieves all accounts from the database.
+     *
+     * @return A List of Account objects. If no accounts are found, an empty list is
+     *         returned.
+     */
     @Override
     public List<Account> getAll() {
         List<Account> accounts = new ArrayList<>();
@@ -107,10 +118,13 @@ public class AccountDao implements BaseDao<Account> {
         return accounts;
     }
 
-    // Retrieve an account by its username from the database
-    // @param username The username of the account to retrieve.
-    // @return The account, if found, wrapped in an Optional; otherwise, an empty
-    // Optional.
+    /**
+     * Retrieves an account from the database based on its username.
+     *
+     * @param username The username of the account.
+     * @return An Optional object, which will contain the account if it was found,
+     *         otherwise it will be empty.
+     */
     public Optional<Account> findAccountByUsername(String username) {
 
         String sql = "SELECT * FROM account WHERE username = ?";
@@ -132,8 +146,15 @@ public class AccountDao implements BaseDao<Account> {
         return Optional.empty();
     }
 
-    // Validate login credentials by checking if the provided username and password
-    // match an account in the database
+    /**
+     * Validates the login credentials by checking if the provided username and
+     * password match an account in the database.
+     *
+     * @param username The username of the account.
+     * @param password The password of the account.
+     * @return An Optional object, which will contain the account if the login was
+     *         successful, otherwise it will be empty.
+     */
     public Optional<Account> validateLogin(String username, String password) {
         String sql = "SELECT * FROM account WHERE username = ?";
         Connection conn = ConnectionUtil.getConnection();
@@ -160,10 +181,12 @@ public class AccountDao implements BaseDao<Account> {
         return Optional.empty();
     }
 
-    // Checks if a username already exists in the database. This can be used to prevent
-    // duplicate usernames in the database.
-    // @param username The username to check for existence in the database.
-    // @return true if the username already exists in the database; false if the username does not exist.
+    /**
+     * Checks if a username already exists in the database.
+     *
+     * @param username The username to check.
+     * @return true if the username already exists in the database; false otherwise.
+     */
     public boolean doesUsernameExist(String username) {
         String sql = "SELECT COUNT(*) FROM account WHERE username = ?";
         Connection conn = ConnectionUtil.getConnection();
@@ -182,7 +205,13 @@ public class AccountDao implements BaseDao<Account> {
         return false;
     }
 
-    // Insert a new account into the database
+    /**
+     * Inserts a new account into the database.
+     *
+     * @param account The account object to insert.
+     * @return The account object that was inserted, including its generated ID.
+     * @throws DaoException if an error occurs during the insertion.
+     */
     @Override
     public Account insert(Account account) {
         String sql = "INSERT INTO account (username, password) VALUES (?, ?)";
@@ -206,7 +235,13 @@ public class AccountDao implements BaseDao<Account> {
         }
     }
 
-    // Updates an existing account in the database
+    /**
+     * Updates an existing account in the database.
+     *
+     * @param account The account object to update.
+     * @return true if the update was successful; false otherwise.
+     * @throws DaoException if an error occurs during the update.
+     */
     @Override
     public boolean update(Account account) {
         String sql = "UPDATE account SET username = ?, password = ? WHERE account_id = ?";
@@ -226,7 +261,13 @@ public class AccountDao implements BaseDao<Account> {
         }
     }
 
-    // Deletes an account from the database
+    /**
+     * Deletes an account from the database.
+     *
+     * @param account The account object to delete.
+     * @return true if the delete was successful; false otherwise.
+     * @throws DaoException if an error occurs during the deletion.
+     */
     @Override
     public boolean delete(Account account) {
         String sql = "DELETE FROM account WHERE account_id = ?";
