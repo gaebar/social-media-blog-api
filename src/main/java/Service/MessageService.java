@@ -32,7 +32,14 @@ public class MessageService {
         this.messageDao = messageDao;
     }
 
-    // Retrieve a Message by its ID using the MessageDao
+    /**
+     * Retrieve a Message by its ID using the MessageDao
+     *
+     * @param id The ID of the Message
+     * @return Optional containing the found Message
+     * @throws ServiceException If the Message is not found or there is a DAO
+     *                          exception
+     */
     public Optional<Message> getMessageById(int id) {
         LOGGER.info("Fetching message with ID: {} ", id);
         try {
@@ -47,7 +54,12 @@ public class MessageService {
         }
     }
 
-    // Retrieve all messages using the MessageDao
+    /**
+     * Retrieve all messages using the MessageDao
+     *
+     * @return List of all Messages
+     * @throws ServiceException If there is a DAO exception
+     */
     public List<Message> getAllMessages() {
         LOGGER.info("Fetching all messages");
         try {
@@ -59,7 +71,13 @@ public class MessageService {
         }
     }
 
-    // Retrieve all messages posted by a specific account
+    /**
+     * Retrieve all messages posted by a specific account
+     *
+     * @param accountId The ID of the account
+     * @return List of Messages posted by the account
+     * @throws ServiceException If there is a DAO exception
+     */
     public List<Message> getMessagesByAccountId(int accountId) {
         LOGGER.info("Fetching messages posted by ID account: {}", accountId);
         try {
@@ -71,9 +89,17 @@ public class MessageService {
         }
     }
 
-    // Insert a new message into the database using the MessageDao.
-    // Checks account permissions to ensure that only the message author can create
-    // messages on their behalf.
+    /**
+     * Insert a new message into the database using the MessageDao.
+     * Checks account permissions to ensure that only the message author can create
+     * messages on their behalf.
+     *
+     * @param message The Message to create
+     * @param account The Account creating the Message
+     * @return The created Message
+     * @throws ServiceException If the Account does not exist, the Message is not
+     *                          valid, or there is a DAO exception
+     */
     public Message createMessage(Message message, Optional<Account> account) {
         LOGGER.info("Creating message: {}", message);
 
@@ -97,9 +123,16 @@ public class MessageService {
         }
     }
 
-    // Update an existing message in the database using the MessageDao.
-    // Checks account permissions to ensure that only the message author can update
-    // their own messages.
+    /**
+     * Update an existing message in the database using the MessageDao.
+     * Checks account permissions to ensure that only the message author can update
+     * their own messages.
+     *
+     * @param message The Message to update
+     * @return The updated Message
+     * @throws ServiceException If the Message does not exist, is not valid, or
+     *                          there is a DAO exception
+     */
     public Message updateMessage(Message message) {
         LOGGER.info("Updating message: {}", message.getMessage_id());
 
@@ -127,9 +160,15 @@ public class MessageService {
         }
     }
 
-    // Delete an existing message from the database.
-    // Check account permissions to ensure that only the message author can delete
-    // their own messages.
+    /**
+     * Delete an existing message from the database.
+     * Check account permissions to ensure that only the message author can delete
+     * their own messages.
+     *
+     * @param message The Message to delete
+     * @throws ServiceException If the Message does not exist or there is a DAO
+     *                          exception
+     */
     public void deleteMessage(Message message) {
         LOGGER.info("Deleting message: {}", message);
         try {
@@ -144,8 +183,14 @@ public class MessageService {
         }
     }
 
-    // Validate a message by checking if the message_text is null, empty, or
-    // exceed the maximum allowed length.
+    /**
+     * Validate a message by checking if the message_text is null, empty, or
+     * exceed the maximum allowed length.
+     *
+     * @param message The Message to validate
+     * @throws ServiceException If the message is null, empty, or exceeds the
+     *                          maximum length
+     */
     private void validateMessage(Message message) {
         LOGGER.info("Validating message: {}", message);
         if (message.getMessage_text() == null || message.getMessage_text().trim().isEmpty()) {
@@ -156,9 +201,15 @@ public class MessageService {
         }
     }
 
-    // Check if the account performing the action is the same as the one that posted
-    // the message.
-    // This is used to maintain user data integrity and security.
+    /**
+     * Check if the account performing the action is the same as the one that posted
+     * the message. This is used to maintain user data integrity and security.
+     *
+     * @param account  The Account that is performing the action
+     * @param postedBy The ID of the account that posted the message
+     * @throws ServiceException If the account is not authorized to modify the
+     *                          message
+     */
     private void checkAccountPermission(Account account, int postedBy) {
         LOGGER.info("Checking account permissions for messages");
         if (account.getAccount_id() != postedBy) {
