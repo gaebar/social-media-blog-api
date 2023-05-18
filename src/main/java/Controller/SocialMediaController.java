@@ -26,9 +26,12 @@ public class SocialMediaController {
         this.messageService = new MessageService();
     }
 
-    // This method sets up the various API endpoints using Javalin's fluent API.
-    // Each endpoint is associated with a method in this controller that handles the
-    // request.
+    /**
+     * This method initializes the social media application with Javalin, creating
+     * necessary endpoints. It returns the initialized Javalin instance.
+     *
+     * @return an instance of Javalin with predefined endpoints.
+     */
     public Javalin startAPI() {
         Javalin app = Javalin.create();
         app.post("/register", this::registerAccount);
@@ -45,11 +48,16 @@ public class SocialMediaController {
 
     }
 
-    // This method handles POST requests to /register. It deserializes the request
-    // body into an Account object and attempts to register the account using the
-    // accountService. If successful, it sends back the registered account as a JSON
-    // response. If an exception occurs during this process, it sets the response
-    // status to 400 (Bad Request).
+    /**
+     * This method handles the registration process for new users.
+     * It expects a POST request to "/register" with the new account details in the
+     * request body.
+     *
+     * @param ctx the Javalin context object representing the current HTTP request
+     *            and response
+     * @throws JsonProcessingException if an error occurs during JSON parsing or
+     *                                 serialization
+     */
     private void registerAccount(Context ctx) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         Account account = mapper.readValue(ctx.body(), Account.class);
@@ -64,11 +72,16 @@ public class SocialMediaController {
         }
     }
 
-    // This method handles POST requests to /login. It deserializes the request body
-    // into an Account object, validates the account's credentials using the
-    // accountService, and sets a session attribute with the logged in account if
-    // validation is successful. If the account doesn't exist or an exception occurs
-    // during this process, it sets the response status to 401 (Unauthorized).
+    /**
+     * This method handles the login process for users.
+     * It expects a POST request to "/login" with the account credentials in the
+     * request body.
+     *
+     * @param ctx the Javalin context object representing the current HTTP request
+     *            and response
+     * @throws JsonProcessingException if an error occurs during JSON parsing or
+     *                                 serialization
+     */
     private void loginAccount(Context ctx) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper(); // it calls a default no-arg constructor from Model.Account - REQUIRED
                                                   // for Jackson ObjectMapper
@@ -93,10 +106,16 @@ public class SocialMediaController {
         }
     }
 
-    // This method handles POST requests to /messages. It deserializes the request
-    // body into a Message object, associates it with an account, and creates the
-    // message using the messageService. If an exception occurs during this process,
-    // it sets the response status to 400 (Bad Request).
+    /**
+     * This method handles the creation of new messages.
+     * It expects a POST request to "/messages" with the message details in the
+     * request body.
+     *
+     * @param ctx the Javalin context object representing the current HTTP request
+     *            and response
+     * @throws JsonProcessingException if an error occurs during JSON parsing or
+     *                                 serialization
+     */
     private void createMessage(Context ctx) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         Message mappedMessage = mapper.readValue(ctx.body(), Message.class);
@@ -112,15 +131,27 @@ public class SocialMediaController {
         }
     }
 
-    // Retrieves all messages from the message service and sends them as a response
+    /**
+     * This method retrieves all messages.
+     * It expects a GET request to "/messages".
+     *
+     * @param ctx the Javalin context object representing the current HTTP request
+     *            and response
+     */
     private void getAllMessages(Context ctx) {
 
         List<Message> messages = messageService.getAllMessages();
         ctx.json(messages);
     }
 
-    // Retrieves a specific message by its ID from the message service and sends it
-    // as a response
+    /**
+     * This method handles the retrieval of a specific message by its ID.
+     * It expects a GET request to "/messages/{message_id}".
+     *
+     * @param ctx the Javalin context object representing the current HTTP request
+     *            and response
+     */
+
     private void getMessageById(Context ctx) {
         try {
             int id = Integer.parseInt(ctx.pathParam("message_id"));
@@ -145,7 +176,13 @@ public class SocialMediaController {
         }
     }
 
-    // Deletes a specific message by its ID from the message service
+    /**
+     * This method handles the deletion of a specific message by its ID.
+     * It expects a DELETE request to "/messages/{message_id}".
+     *
+     * @param ctx the Javalin context object representing the current HTTP request
+     *            and response
+     */
     private void deleteMessageById(Context ctx) {
         try {
             // Retrieve the message ID from the path parameter
@@ -171,7 +208,16 @@ public class SocialMediaController {
         }
     }
 
-    // Update a specific message by its ID with new content
+    /**
+     * This method handles the update of a specific message by its ID.
+     * It expects a PATCH request to "/messages/{message_id}" with the new content
+     * of the message in the request body.
+     *
+     * @param ctx the Javalin context object representing the current HTTP request
+     *            and response
+     * @throws JsonProcessingException if an error occurs during JSON parsing or
+     *                                 serialization
+     */
     private void updateMessageById(Context ctx) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         Message mappedMessage = mapper.readValue(ctx.body(), Message.class);
@@ -195,8 +241,13 @@ public class SocialMediaController {
         }
     }
 
-    // Retrieve all messages associated with a specific account ID and sends them as
-    // a response
+    /**
+     * This method retrieves all messages associated with a specific account ID.
+     * It expects a GET request to "/accounts/{account_id}/messages".
+     *
+     * @param ctx the Javalin context object representing the current HTTP request
+     *            and response
+     */
     private void getMessagesByAccountId(Context ctx) {
         try {
             int accountId = Integer.parseInt(ctx.pathParam("account_id"));
