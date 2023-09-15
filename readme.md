@@ -28,6 +28,8 @@ FOREIGN KEY (posted_by) REFERENCES Account(account_id)
 
 # Requirements
 
+Below are the detailed requirements for the API functionalities:
+
 ## 1: API Registration Processing
 
 Users should be able to register new accounts at the endpoint: POST `localhost:8080/register`. The body of the request should contain a JSON representation of an account, excluding the account_id.
