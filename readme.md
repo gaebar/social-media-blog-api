@@ -2,13 +2,13 @@
 
 ## Background 
 
-When building a full-stack application, we're typically concerned with both a front end, that displays information to the user and takes in input, and a backend, that manages persisted information.
+In building a full-stack application, we generally focus on two aspects: the frontend, which displays information to the user and collects inputs, and the backend, which manages the persistent information.
 
-This project will be a backend for a hypothetical social media app, where we must manage our users’ accounts as well as any messages that they submit to the application. The application will function as a micro-blogging or messaging app. In our hypothetical application, any user should be able to see all of the messages posted to the site, or they can see the messages posted by a particular user. In either case, we require a backend which is able to deliver the data needed to display this information as well as process actions like logins, registrations, message creations, message updates, and message deletions.
+This project entails creating a backend for a hypothetical social media app. This backend will manage user accounts and the messages they submit to the application. The app will function similarly to a micro-blogging or messaging platform. Within this hypothetical setup, users should be able to view all messages posted on the site, or filter to see messages from a specific user. To support these functionalities, we require a backend capable of handling data retrieval and processing actions such as logins, registrations, and message creations, updates, and deletions.
 
 ## Database Tables 
 
-These will be provided in a sql script, and a ConnectionUtil class that will run the sql script is provided:
+The necessary database tables will be provided in a SQL script, along with a ConnectionUtil class to execute the script:
 
 ### Account
 ```
@@ -30,10 +30,10 @@ FOREIGN KEY (posted_by) REFERENCES Account(account_id)
 
 ## 1: API Registration Processing
 
-As a user, I should be able to create a new Account on the endpoint POST localhost:8080/register. The body will contain a representation of a JSON Account, but will not contain an account_id.
+Users should be able to register new accounts at the endpoint: POST `localhost:8080/register`. The body of the request should contain a JSON representation of an account, excluding the account_id.
 
-- The registration will be successful if and only if the username is not blank, the password is at least 4 characters long, and an Account with that username does not already exist. If all these conditions are met, the response body should contain a JSON of the Account, including its account_id. The response status should be 200 OK, which is the default. The new account should be persisted to the database.
-- If the registration is not successful, the response status should be 400. (Client error)
+- A registration is successful only if the username is non-empty, the password contains at least 4 characters, and no existing account is associated with the chosen username. Meeting these conditions will yield a 200 OK response status and a response body containing a JSON representation of the new account, inclusive of its account_id. The new account should be persisted in the database.
+- Unsuccessful registrations should return a 400 response status (Client Error).
 
 ## 2: API Login Processing
 
