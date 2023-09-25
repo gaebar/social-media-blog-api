@@ -1,5 +1,7 @@
 # Revature Project: Social Media Blog API
 
+This repository houses my implementation of a backend solution for a hypothetical social media app, as proposed by my class at Revature. The project aimed at creating a robust API for managing user accounts and messages, mimicking the features of a micro-blogging or messaging platform.
+
 ## Background 
 
 In building a full-stack application, we generally focus on two aspects: the frontend, which displays information to the user and collects inputs, and the backend, which manages the persistent information.
@@ -95,6 +97,6 @@ You SHOULD be changing the SocialMediaController class to add endpoints to the S
 You SHOULD be creating and designing DAO and Service class to allow you to complete the project. In theory, you could design the project however you like, so long as the functionality works and you are somehow persisting data to the database - but a 3-layer architecture is a robust design pattern and following help you in the long run. You can refer to prior mini-projects and course material for help on designing your application in this way.
 
 # Conclusion
-Best of luck as you embark on this developmental journey!
+I am confident in your abilities and look forward to seeing your implementation. Best of luck as you embark on this developmental journey!
 
 Ted Balashov
